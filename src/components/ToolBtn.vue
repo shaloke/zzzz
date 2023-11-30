@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import {globalSize} from '@/store/resize'
+const gSize = globalSize()
 const props = defineProps({
   title: {
     type: String,
@@ -21,12 +23,12 @@ const props = defineProps({
     <p>{{ props.title }}</p>
   </div> -->
   <div class="toolbtn" :style="{background:background}">
-    <v-btn variant="text" width="5rem" height="5rem">
-      <div class="toolbtn-v">
+    <v-btn variant="text" :width="gSize.toolBtnSize" :height="gSize.toolBtnSize">
+      <div class="toolbtn-v" :style="{fontSize:gSize.toolBtnTextSize}">
         <slot></slot>
       </div>
     </v-btn>
-    <p class="toolbtn-p">{{ props.title }}</p>
+    <p class="toolbtn-p" :style="{fontSize:gSize.toolPSize}">{{ props.title }}</p>
   </div>
 </template>
 
@@ -37,13 +39,13 @@ const props = defineProps({
   justify-content: center;
   align-items: center;
   &-v {
-    font-size: 2.5rem;
+    // font-size: 2.5rem;
     display: flex;
     justify-content: center;
     align-items: center;
   }
   &-p {
-    font-size: 1.25rem;
+    // font-size: 1.25rem;
   }
 }
 </style>

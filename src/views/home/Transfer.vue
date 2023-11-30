@@ -10,13 +10,14 @@ import type { UploadProps, UploadUserFile } from "element-plus";
 import { ElMessage, ElMessageBox } from "element-plus";
 import type { Action } from "element-plus";
 // import ListItem from "@/components/ListItem.vue";
+import {globalSize} from '@/store/resize'
 
 interface Tree {
   id: string;
   label: string;
   children?: Tree[];
 }
-
+const gSize = globalSize()
 const fileList = ref<UploadUserFile[]>([
   {
     name: "element-plus-logo.svg",
@@ -172,9 +173,7 @@ onMounted(() => {
 watch(transfer, () => {
   robotizationBotHeight();
 });
-// watch(transfer,()=>{
 
-// })
 </script>
 
 <template>
@@ -213,6 +212,7 @@ watch(transfer, () => {
           variant="tonal"
           @click="drawer = !drawer"
           color="#5F9AA2"
+          :size="gSize.buttonSize"
         >
           选择接收用户
         </v-btn>
@@ -240,7 +240,7 @@ watch(transfer, () => {
         :limit="3"
         :on-exceed="handleExceed"
       >
-        <v-btn :prepend-icon="IconFiles" variant="tonal" color="#5F9AA2">
+        <v-btn :prepend-icon="IconFiles" variant="tonal" color="#5F9AA2" :size="gSize.buttonSize">
           上传文件
         </v-btn>
         <template #tip>

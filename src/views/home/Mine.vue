@@ -82,7 +82,7 @@ onMounted(() => {});
           >
         </p>
       </div>
-      <v-avatar image="../../../src/assets/imgs/head.jpg" size="80"></v-avatar>
+      <v-avatar image="../../../src/assets/imgs/head.jpg" :size="gSize.avatarSize"></v-avatar>
     </div>
     <div class="mine-mid" ref="mid">
       <!-- <div class="mine-mid-title">

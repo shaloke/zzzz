@@ -97,16 +97,6 @@ const expand = ref<boolean>(false);
             </v-chip>
           </div>
           <div class="">
-            <!-- <v-btn
-              v-if="props.spread"
-              @click="expand = !expand"
-              variant="text"
-              color="green"
-              >展开</v-btn
-            >
-            <el-button color="blue" v-if="props.operate">插队</el-button>
-            <el-button color="#FF968F" v-if="props.cancel">撤销</el-button> -->
-
             <v-btn
               v-if="true"
               @click="expand = !expand"
@@ -156,9 +146,15 @@ const expand = ref<boolean>(false);
           </v-expand-transition>
         </div>
       </template>
-      <v-card-actions>
-        <div style="display: flex;justify-content: flex-end;width: 100%;">
-          <v-btn color="blue" v-if="true" plain :ripple="false" variant="outlined" :size="gSize.buttonSize"
+      <div class="listitem-bot">
+        <v-btn
+          color="blue"
+          v-if="true"
+          plain
+          :ripple="false"
+          variant="outlined"
+          :size="gSize.buttonSize"
+          style="margin-right: .25rem;"
           >插队</v-btn
         >
         <v-btn
@@ -170,8 +166,7 @@ const expand = ref<boolean>(false);
           :size="gSize.buttonSize"
           >撤销</v-btn
         >
-        </div>
-      </v-card-actions>
+      </div>
     </v-card>
   </div>
 </template>
@@ -223,6 +218,13 @@ const expand = ref<boolean>(false);
         flex-wrap: wrap;
       }
     }
+  }
+  &-bot {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-bottom: .5rem;
+    padding-right: .5rem;
   }
 }
 </style>

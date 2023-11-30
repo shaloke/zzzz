@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import IconPersonal from "~icons/app/personal.svg";
 import IconLsit from "~icons/app/list.svg";
 import IconSend from "~icons/app/send.svg";
 import MenuBtn from "@/components/MenuBtn.vue";
-import Mine from "@/views/home/Mine.vue";
-import List from "./List.vue";
-import Transfer from "./Transfer.vue";
+import router from "@/router";
 const tabs = ref<any>(1);
 
 const menu = ref<any>(null);
@@ -33,6 +31,21 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener("resize", resizeFunc);
 });
+watch(
+  tabs,
+  () => {
+    if (tabs.value === 1) {
+      router.push("/transfer");
+    } else if (tabs.value === 2) {
+      router.push("/list");
+    } else if (tabs.value === 3) {
+      router.push("/mine");
+    }
+  },
+  {
+    immediate: true,
+  }
+);
 </script>
 
 <template>
@@ -42,11 +55,9 @@ onBeforeUnmount(() => {
       :style="{ height: viewHeight + 'px' }"
       :key="viewHeight"
     >
-      <v-window v-model="tabs">
-        <v-window-item :value="1" :style="{ height: viewHeight + 'px' }"><Transfer></Transfer></v-window-item>
-        <v-window-item :value="2" :style="{ height: viewHeight + 'px' }"><List></List></v-window-item>
-        <v-window-item :value="3" :style="{ height: viewHeight + 'px' }"><Mine></Mine></v-window-item>
-      </v-window>
+      <div :style="{ height: viewHeight + 'px' }">
+        <RouterView></RouterView>
+      </div>
     </div>
     <div class="main-menu" ref="menu" v-show="showmune">
       <v-tabs
