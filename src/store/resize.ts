@@ -71,6 +71,15 @@ export const globalSize = defineStore("globalSize", {
       } else {
         return '1.5rem';
       }
+    },
+    transferBoxSize():string|number{
+      if (screen.value < minsize) {
+        return '6rem';
+      } else if (screen.value < lagsize && screen.value > minsize) {
+        return '10rem';
+      } else {
+        return '10rem';
+      }
     }
   },
 });

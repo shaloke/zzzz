@@ -98,7 +98,7 @@ const expand = ref<boolean>(false);
           </div>
           <div class="">
             <v-btn
-              v-if="true"
+              v-if="props.spread"
               @click="expand = !expand"
               color="green"
               plain
@@ -149,7 +149,7 @@ const expand = ref<boolean>(false);
       <div class="listitem-bot">
         <v-btn
           color="blue"
-          v-if="true"
+          v-if="props.operate"
           plain
           :ripple="false"
           variant="outlined"
@@ -159,7 +159,7 @@ const expand = ref<boolean>(false);
         >
         <v-btn
           color="#FF968F"
-          v-if="true"
+          v-if="props.cancel"
           plain
           :ripple="false"
           variant="outlined"

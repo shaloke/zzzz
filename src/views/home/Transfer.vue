@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import IconFiles from "~icons/app/files.svg";
 // import IconClose from "~icons/app/close.svg";
 import IconClosefill from "~icons/app/closefill.svg";
@@ -9,15 +9,27 @@ import type { TreeNode } from "element-plus/es/components/tree-v2/src/types";
 import type { UploadProps, UploadUserFile } from "element-plus";
 import { ElMessage, ElMessageBox } from "element-plus";
 import type { Action } from "element-plus";
-// import ListItem from "@/components/ListItem.vue";
-import {globalSize} from '@/store/resize'
+import ListItem from "@/components/ListItem.vue";
+import { globalSize } from "@/store/resize";
+import useWindowResize from "@/utils/useWindowResize";
 
+const screen = useWindowResize();
 interface Tree {
   id: string;
   label: string;
   children?: Tree[];
 }
-const gSize = globalSize()
+const gSize = globalSize();
+
+const reciverHeight = computed(() => {
+  if (screen.value < 350) {
+    return "3rem";
+  } else if (screen.value < 500 && screen.value > 350) {
+    return "5rem";
+  } else {
+    return "5rem";
+  }
+});
 const fileList = ref<UploadUserFile[]>([
   {
     name: "element-plus-logo.svg",
@@ -173,7 +185,6 @@ onMounted(() => {
 watch(transfer, () => {
   robotizationBotHeight();
 });
-
 </script>
 
 <template>
@@ -205,7 +216,11 @@ watch(transfer, () => {
     </div>
   </el-drawer>
   <div class="transfer" ref="transfer">
-    <div class="transfer-top" ref="transfertop">
+    <div
+      class="transfer-top"
+      ref="transfertop"
+      :style="{ height: gSize.transferBoxSize }"
+    >
       <div class="transfer-top-btns">
         <v-btn
           :prepend-icon="IconSend"
@@ -216,19 +231,25 @@ watch(transfer, () => {
         >
           选择接收用户
         </v-btn>
-        <el-button>清空</el-button>
+        <v-btn :size="gSize.buttonSize" variant="tonal">清空</v-btn>
       </div>
-      <div class="transfer-top-reciver">
+      <div class="transfer-top-reciver" :style="{height:reciverHeight,gap:screen < 350 ? '0.25rem' : '.5rem'}">
         <div class="transfer-top-reciver-item" v-for="i in 10" :key="i">
-          <v-chip label>
+          <v-chip label :size="gSize.chipSize">
             <p class="transfer-top-reciver-item-p">黄俊康{{ i }}</p>
             <v-icon end :icon="IconClosefill" @click="delReciver"></v-icon>
           </v-chip>
         </div>
       </div>
     </div>
-    <div class="transfer-mid" ref="transfermid">
-      <el-button class="transfer-mid-sub"> 提交 </el-button>
+    <div
+      class="transfer-mid"
+      ref="transfermid"
+      :style="{ height: gSize.transferBoxSize }"
+    >
+      <v-btn class="transfer-mid-sub" :size="gSize.buttonSize" variant="tonal">
+        提交
+      </v-btn>
       <el-upload
         v-model:file-list="fileList"
         class="upload-demo"
@@ -240,40 +261,27 @@ watch(transfer, () => {
         :limit="3"
         :on-exceed="handleExceed"
       >
-        <v-btn :prepend-icon="IconFiles" variant="tonal" color="#5F9AA2" :size="gSize.buttonSize">
+        <v-btn
+          :prepend-icon="IconFiles"
+          variant="tonal"
+          color="#5F9AA2"
+          :size="gSize.buttonSize"
+        >
           上传文件
         </v-btn>
         <template #tip>
           <div class="el-upload__tip">文件大小不能超过10M</div>
         </template>
       </el-upload>
-      <!-- <el-upload
-        ref="uploadRef"
-        :with-credentials="true"
-        :auto-upload="false"
-        :action="postFilesUrl"
-        :file-list="filesList"
-        list-type="picture"
-        :data="edata"
-        :multiple="true"
-        name="files"
-        :limit="10"
-        :before-upload="beforeUpload"
-      >
-      <v-btn :prepend-icon="IconFiles" variant="tonal" color="#5865f2"> 上传文件 </v-btn>
-        <template #tip>
-          <div class="el-upload__tip">
-            文件大小不能超过10M
-          </div>
-        </template>
-      </el-upload> -->
     </div>
     <div
       class="transfer-bot"
       :style="{ height: botHeight + 'px' }"
       :key="botHeight"
       ref="transferbot"
-    ></div>
+    >
+      <ListItem></ListItem>
+    </div>
   </div>
 </template>
 
@@ -296,11 +304,11 @@ watch(transfer, () => {
   width: 100vw;
   // background-color: #000;
   height: 100%;
-  background: url('../../assets/imgs/sea.jpg');
-  background-size: contain;
+  // background: url("../../assets/imgs/sea.jpg");
+  // background-size: contain;
+  background-color: #f3f3f3;
   padding: 0.75rem;
   &-top {
-    height: 10rem;
     background: #ffffff;
     margin-bottom: 0.5rem;
     box-shadow: 0 1px 5px rgba(45, 47, 51, 0.2);
@@ -314,11 +322,10 @@ watch(transfer, () => {
       margin-bottom: 0.5rem;
     }
     &-reciver {
-      height: 5rem;
       overflow-y: scroll;
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(80px, 4fr));
-      gap: 0.5rem;
+      // gap: 0.5rem;
       margin-bottom: 1rem;
       &-item {
         text-align: center;
@@ -332,7 +339,6 @@ watch(transfer, () => {
   }
   &-mid {
     background: #ffffff;
-    height: 10rem;
     overflow-y: scroll;
     border-radius: 5px;
     box-shadow: 0 1px 5px rgba(45, 47, 51, 0.2);

@@ -71,6 +71,7 @@ watch(list, () => {
 .list {
   height: 100%;
   padding: 0 1rem;
+  // background-color: #f3f3f3;
   &-top {
     margin-top: 1rem;
   }
