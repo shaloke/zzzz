@@ -45,7 +45,7 @@ const props = defineProps({
   startTime: {
     type: String,
     default: () => {
-      return "";
+      return "yy-mm-dd hh-mm-ss";
     },
     require: false,
   },
@@ -53,7 +53,7 @@ const props = defineProps({
   endTime: {
     type: String,
     default: () => {
-      return "";
+      return "yy-mm-dd hh-mm-ss";
     },
     require: false,
   },
@@ -61,14 +61,18 @@ const props = defineProps({
   recivers: {
     type: Array as PropType<string[]>,
     default: () => {
-      return [];
+      return ['xxx'];
     },
     require: false,
   },
   cardinfo: {
     type: Object as PropType<CARDINFO>,
     default: () => {
-      return {};
+      return {
+        id:'999',
+        status:'xxxxxx',
+        sender:'xxx'
+      };
     },
     require: true,
   },

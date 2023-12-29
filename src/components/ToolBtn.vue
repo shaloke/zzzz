@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {globalSize} from '@/store/resize'
+import router from "@/router";
 const gSize = globalSize()
 const props = defineProps({
   title: {
@@ -14,7 +15,16 @@ const props = defineProps({
       return "";
     },
   },
+  path: {
+    type: String,
+    default: () => {
+      return "";
+    },
+  },
 });
+const routerGo = () =>{
+  router.push(props.path)
+}
 </script>
 
 <template>
@@ -22,7 +32,7 @@ const props = defineProps({
     <slot></slot>
     <p>{{ props.title }}</p>
   </div> -->
-  <div class="toolbtn" :style="{background:background}">
+  <div class="toolbtn" :style="{background:background}" @click="routerGo">
     <v-btn variant="text" :width="gSize.toolBtnSize" :height="gSize.toolBtnSize">
       <div class="toolbtn-v" :style="{fontSize:gSize.toolBtnTextSize}">
         <slot></slot>

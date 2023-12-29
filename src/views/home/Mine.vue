@@ -89,11 +89,11 @@ onMounted(() => {});
         <p>服务</p>
       </div> -->
       <div class="mine-mid-tools">
-        <ToolBtn title="个人信息"
+        <ToolBtn title="个人信息" path="/personalinfo"
           ><IconPersonalinfo></IconPersonalinfo
         ></ToolBtn>
-        <ToolBtn title="个人权限"><IconPower></IconPower></ToolBtn>
-        <ToolBtn title="意见箱"><IconMail></IconMail></ToolBtn>
+        <ToolBtn title="个人权限" path="/personalauthority"><IconPower></IconPower></ToolBtn>
+        <ToolBtn title="意见箱" path="/complaintbox"><IconMail></IconMail></ToolBtn>
       </div>
     </div>
     <div class="mine-bot" ref="bot">
@@ -114,7 +114,7 @@ onMounted(() => {});
     </div>
   </div>
 </template>
-p
+
 <style scoped lang="scss">
 .mine {
   width: 100%;
