@@ -55,6 +55,7 @@ watch(list, () => {
       :height="listvirtualHeight + 'px'"
       :items="vertal"
       ref="listvirtual"
+      style="padding: 0 .25rem;"
     >
       <template v-slot:default>
         <ListItem
@@ -70,10 +71,12 @@ watch(list, () => {
 <style scoped lang="scss">
 .list {
   height: 100%;
-  padding: 0 1rem;
   // background-color: #f3f3f3;
   &-top {
     margin-top: 1rem;
+    padding: 0 .25rem;
+    // margin-bottom: .5rem;
+    box-shadow: 0 1px 5px rgba(45, 47, 51, 0.1);
   }
 }
 </style>

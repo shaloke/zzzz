@@ -21,6 +21,7 @@ const resizeFunc = () => {
     showmune.value = true;
   }
 };
+
 onMounted(() => {
   screenHeight.value =
     document.documentElement.clientHeight || document.body.clientHeight;

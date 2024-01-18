@@ -8,6 +8,9 @@ import ListItem from "@/components/ListItem.vue";
 import IconBuilding from "~icons/app/building.svg";
 import IconWork from "~icons/app/work.svg";
 import {globalSize} from '@/store/resize'
+import { userStore } from '@/store/user';
+
+const UStore = userStore()
 const gSize = globalSize()
 const mine = ref<any>(null);
 const top = ref<any>(null);
@@ -72,17 +75,17 @@ onMounted(() => {});
   <div class="mine" ref="mine">
     <div class="mine-top" ref="top">
       <div class="mine-top-text">
-        <p class="mine-top-text-name">黄俊康</p>
+        <p class="mine-top-text-name">{{ UStore.$state.userInfo.name }}</p>
         <p class="mine-top-text-info">
           <v-chip label color="blue" class="mr-2" variant="flat" :size="gSize.chipSize"
-            ><v-icon :icon="IconBuilding"></v-icon>广州总部</v-chip
+            ><v-icon :icon="IconBuilding"></v-icon>{{ UStore.$state.userInfo.factory }}</v-chip
           >
           <v-chip label color="#5F9AA2" class="mr-2" variant="flat" :size="gSize.chipSize"
-            ><v-icon :icon="IconWork"></v-icon>信息化中心</v-chip
+            ><v-icon :icon="IconWork"></v-icon>{{ UStore.$state.userInfo.dept_name }}</v-chip
           >
         </p>
       </div>
-      <v-avatar image="../../../src/assets/imgs/head.jpg" :size="gSize.avatarSize"></v-avatar>
+      <v-avatar :image="UStore.$state.userInfo.avatar" :size="gSize.avatarSize"></v-avatar>
     </div>
     <div class="mine-mid" ref="mid">
       <!-- <div class="mine-mid-title">
@@ -120,8 +123,8 @@ onMounted(() => {});
   width: 100%;
   height: 100%;
   // padding: 0 1.5rem;
-  // background-color: rgba(255, 0, 0, 0.555);
-  background: url("../../assets/imgs/sea.jpg");
+  background-color: rgba(255, 0, 0, 0.555);
+  // background: url("../../assets/imgs/sea.jpg");
   background-size: contain;
   &-top {
     padding-top: 2rem;

@@ -19,6 +19,10 @@ interface Tree {
   label: string;
   children?: Tree[];
 }
+interface Recivers {
+  user_id: string;
+  user_name: string;
+}
 const gSize = globalSize();
 
 const reciverHeight = computed(() => {
@@ -126,19 +130,19 @@ const filterMethod = (query: string, node: TreeNode) => {
   return node.label!.includes(query);
 };
 
-const delReciver = () => {
-  ElMessageBox.alert("是否删除所选接收人？", "确认框", {
-    confirmButtonText: "确认",
-    callback: (action: Action) => {
-      ElMessage({
-        type: "info",
-        message: `${action}`,
-      });
-    },
-  });
+/**
+ * 抽屉人员名单列表高度
+ */
+const namelistHeight = ref<number>(300);
+const drawerOpend = () => {
+  const bodyHeight = (
+    document.getElementsByClassName("el-drawer__body")[0] as any
+  ).offsetHeight;
+  namelistHeight.value = bodyHeight - 100;
 };
-
-// 底部传输列表显示区域高度自适应
+/**
+ * 底部传输列表显示区域高度自适应
+ */
 const robotizationBotHeight = () => {
   const transfertop_margin_bottom = window
     .getComputedStyle(transfertop.value)
@@ -179,6 +183,65 @@ const robotizationBotHeight = () => {
     transfertop.value.getBoundingClientRect().height -
     transfermid.value.getBoundingClientRect().height;
 };
+/**
+ * 选中的接收人
+ */
+const recivers = ref<Array<Recivers>>([
+  {
+    user_id: "1",
+    user_name: "黄俊康",
+  },
+  {
+    user_id: "2",
+    user_name: "小朋友",
+  },
+]);
+/**
+ * 删除接收人
+ */
+const delReciver = (id: string) => {
+  if (id === "all") {
+    ElMessageBox.alert("是否删除所有接收人？", "确认框", {
+      confirmButtonText: "确认",
+      callback: (action: Action) => {
+        if (action === "confirm") {
+          recivers.value = [];
+          ElMessage({
+            type: "info",
+            message: `删除成功`,
+          });
+        } else {
+          ElMessage({
+            type: "info",
+            message: `取消删除`,
+          });
+        }
+      },
+    });
+  } else {
+    ElMessageBox.alert("是否删除所选接收人？", "确认框", {
+      confirmButtonText: "确认",
+      callback: (action: Action) => {
+        if (action === "confirm") {
+          recivers.value.forEach((item, index) => {
+            if (item.user_id === id) {
+              recivers.value.splice(index, 1);
+            }
+          });
+          ElMessage({
+            type: "info",
+            message: `删除成功`,
+          });
+        } else {
+          ElMessage({
+            type: "info",
+            message: `取消删除`,
+          });
+        }
+      },
+    });
+  }
+};
 onMounted(() => {
   robotizationBotHeight();
 });
@@ -194,6 +257,7 @@ watch(transfer, () => {
     size="100%"
     show-close
     :modal="false"
+    @open="drawerOpend"
   >
     <div class="drawer">
       <div class="drawer-top">
@@ -210,17 +274,13 @@ watch(transfer, () => {
           :data="data"
           :props="props"
           :filter-method="(filterMethod as any)"
-          :height="208"
+          :height="namelistHeight"
         />
       </div>
     </div>
   </el-drawer>
   <div class="transfer" ref="transfer">
-    <div
-      class="transfer-top"
-      ref="transfertop"
-      :style="{ height: gSize.transferBoxSize }"
-    >
+    <div class="transfer-top" ref="transfertop">
       <div class="transfer-top-btns">
         <v-btn
           :prepend-icon="IconSend"
@@ -231,22 +291,37 @@ watch(transfer, () => {
         >
           选择接收用户
         </v-btn>
-        <v-btn :size="gSize.buttonSize" variant="tonal">清空</v-btn>
+        <v-btn
+          :size="gSize.buttonSize"
+          variant="tonal"
+          @click="delReciver('all')"
+          >清空</v-btn
+        >
       </div>
-      <div class="transfer-top-reciver" :style="{height:reciverHeight,gap:screen < 350 ? '0.25rem' : '.5rem'}">
-        <div class="transfer-top-reciver-item" v-for="i in 10" :key="i">
+      <div
+        class="transfer-top-reciver"
+        :style="{
+          maxHeight: reciverHeight,
+          gap: screen < 350 ? '0.25rem' : '.5rem',
+        }"
+      >
+        <div
+          class="transfer-top-reciver-item"
+          v-for="i in recivers"
+          :key="i.user_id"
+        >
           <v-chip label :size="gSize.chipSize">
-            <p class="transfer-top-reciver-item-p">黄俊康{{ i }}</p>
-            <v-icon end :icon="IconClosefill" @click="delReciver"></v-icon>
+            <p class="transfer-top-reciver-item-p">{{ i.user_name }}</p>
+            <v-icon
+              end
+              :icon="IconClosefill"
+              @click="delReciver(i.user_id)"
+            ></v-icon>
           </v-chip>
         </div>
       </div>
     </div>
-    <div
-      class="transfer-mid"
-      ref="transfermid"
-      :style="{ height: gSize.transferBoxSize }"
-    >
+    <div class="transfer-mid" ref="transfermid">
       <v-btn class="transfer-mid-sub" :size="gSize.buttonSize" variant="tonal">
         提交
       </v-btn>
@@ -280,7 +355,7 @@ watch(transfer, () => {
       :key="botHeight"
       ref="transferbot"
     >
-      <ListItem></ListItem>
+      <ListItem :operate="true" :cancel="true"></ListItem>
     </div>
   </div>
 </template>
@@ -309,6 +384,8 @@ watch(transfer, () => {
   background-color: #f3f3f3;
   padding: 0.75rem;
   &-top {
+    height: auto;
+    max-height: 10rem;
     background: #ffffff;
     margin-bottom: 0.5rem;
     box-shadow: 0 1px 5px rgba(45, 47, 51, 0.2);
@@ -344,6 +421,7 @@ watch(transfer, () => {
     box-shadow: 0 1px 5px rgba(45, 47, 51, 0.2);
     padding: 0.5rem 0.25rem;
     position: relative;
+    max-height: 10rem;
     &-sub {
       position: absolute;
       top: 0.5rem;
