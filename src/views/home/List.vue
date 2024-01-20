@@ -24,10 +24,16 @@ const resizeListHeight = () => {
   const listsearch_margin_top = window
     .getComputedStyle(listsearch.value)
     .getPropertyValue("margin-top");
+  const listsearch_margin_bottom = window
+    .getComputedStyle(listsearch.value)
+    .getPropertyValue("margin-bottom");
   listvirtualHeight.value =
     listHeight -
     Number(
       listsearch_margin_top.substring(0, listsearch_margin_top.length - 2)
+    ) -
+    Number(
+      listsearch_margin_bottom.substring(0, listsearch_margin_bottom.length - 2)
     ) -
     listsearch.value.getBoundingClientRect().height;
 };
@@ -47,36 +53,44 @@ watch(list, () => {
         label="搜索"
         clearable
         variant="outlined"
+        color="#5f9aa2"
+        density="compact"
         :append-icon="IconSearch"
         @click:append="search"
       ></v-text-field>
     </div>
-    <v-virtual-scroll
-      :height="listvirtualHeight + 'px'"
-      :items="vertal"
-      ref="listvirtual"
-      style="padding: 0 .25rem;"
-    >
-      <template v-slot:default>
-        <ListItem
-          :operate="false"
-          :spread="false"
-          :cardinfo="{ id: '334975', sender: '黄俊康', status: '文件传输中' }"
-        ></ListItem>
-      </template>
-    </v-virtual-scroll>
+    <div class="list-content">
+      <v-virtual-scroll
+        :height="listvirtualHeight + 'px'"
+        :items="vertal"
+        ref="listvirtual"
+        style="padding: 0 0.25rem"
+      >
+        <template v-slot:default>
+          <ListItem
+            :operate="false"
+            :spread="false"
+            :cardinfo="{ id: '334975', sender: '黄俊康', status: '文件传输中' }"
+          ></ListItem>
+        </template>
+      </v-virtual-scroll>
+    </div>
   </div>
 </template>
 
 <style scoped lang="scss">
 .list {
   height: 100%;
-  // background-color: #f3f3f3;
+  background-color: #f3f3f3;
   &-top {
-    margin-top: 1rem;
-    padding: 0 .25rem;
-    // margin-bottom: .5rem;
+    background-color: #ffffff;
+    padding-top: 1rem;
+    margin-bottom: 0.45rem;
+    padding: 1rem 0.25rem 0 0.25rem;
     box-shadow: 0 1px 5px rgba(45, 47, 51, 0.1);
+  }
+  &-content {
+    padding: 0 0.25rem;
   }
 }
 </style>

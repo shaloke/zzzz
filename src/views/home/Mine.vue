@@ -123,7 +123,7 @@ onMounted(() => {});
   width: 100%;
   height: 100%;
   // padding: 0 1.5rem;
-  background-color: rgba(255, 0, 0, 0.555);
+  background-color: #5f9aa240;
   // background: url("../../assets/imgs/sea.jpg");
   background-size: contain;
   &-top {
@@ -139,7 +139,7 @@ onMounted(() => {});
       &-name {
         font-size: 2rem;
         font-weight: 600;
-        color: #ffffff;
+        color: #2c2f39;
       }
       &-info {
         font-size: 1rem;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from "vue";
+import { ref, onMounted, computed } from "vue";
 import IconFiles from "~icons/app/files.svg";
 // import IconClose from "~icons/app/close.svg";
 import IconClosefill from "~icons/app/closefill.svg";
@@ -12,16 +12,17 @@ import type { Action } from "element-plus";
 import ListItem from "@/components/ListItem.vue";
 import { globalSize } from "@/store/resize";
 import useWindowResize from "@/utils/useWindowResize";
+import { getCloselyReceiver } from "@/apis/apis";
+import { receiversStore } from "@/store/receiver";
+import IconClean from "~icons/app/clean.svg";
+import IconUpload from "~icons/app/upload.svg";
+const RStore = receiversStore();
 
 const screen = useWindowResize();
 interface Tree {
   id: string;
   label: string;
   children?: Tree[];
-}
-interface Recivers {
-  user_id: string;
-  user_name: string;
 }
 const gSize = globalSize();
 
@@ -140,62 +141,7 @@ const drawerOpend = () => {
   ).offsetHeight;
   namelistHeight.value = bodyHeight - 100;
 };
-/**
- * 底部传输列表显示区域高度自适应
- */
-const robotizationBotHeight = () => {
-  const transfertop_margin_bottom = window
-    .getComputedStyle(transfertop.value)
-    .getPropertyValue("margin-bottom");
-  const transfermid_margin_bottom = window
-    .getComputedStyle(transfermid.value)
-    .getPropertyValue("margin-bottom");
-  const transfer_padding_top = window
-    .getComputedStyle(transfer.value)
-    .getPropertyValue("padding-top");
-  const transfer_padding_bottom = window
-    .getComputedStyle(transfer.value)
-    .getPropertyValue("padding-bottom");
-  const transferbot_margin_top = window
-    .getComputedStyle(transferbot.value)
-    .getPropertyValue("margin-top");
-  botHeight.value =
-    transfer.value.getBoundingClientRect().height -
-    Number(
-      transfertop_margin_bottom.substring(
-        0,
-        transfertop_margin_bottom.length - 2
-      )
-    ) -
-    Number(
-      transfermid_margin_bottom.substring(
-        0,
-        transfermid_margin_bottom.length - 2
-      )
-    ) -
-    Number(transfer_padding_top.substring(0, transfer_padding_top.length - 2)) -
-    Number(
-      transfer_padding_bottom.substring(0, transfer_padding_bottom.length - 2)
-    ) -
-    Number(
-      transferbot_margin_top.substring(0, transferbot_margin_top.length - 2)
-    ) -
-    transfertop.value.getBoundingClientRect().height -
-    transfermid.value.getBoundingClientRect().height;
-};
-/**
- * 选中的接收人
- */
-const recivers = ref<Array<Recivers>>([
-  {
-    user_id: "1",
-    user_name: "黄俊康",
-  },
-  {
-    user_id: "2",
-    user_name: "小朋友",
-  },
-]);
+
 /**
  * 删除接收人
  */
@@ -205,7 +151,7 @@ const delReciver = (id: string) => {
       confirmButtonText: "确认",
       callback: (action: Action) => {
         if (action === "confirm") {
-          recivers.value = [];
+          RStore.$state.recv_user = [];
           ElMessage({
             type: "info",
             message: `删除成功`,
@@ -223,9 +169,9 @@ const delReciver = (id: string) => {
       confirmButtonText: "确认",
       callback: (action: Action) => {
         if (action === "confirm") {
-          recivers.value.forEach((item, index) => {
+          RStore.$state.recv_user.forEach((item, index) => {
             if (item.user_id === id) {
-              recivers.value.splice(index, 1);
+              RStore.$state.recv_user.splice(index, 1);
             }
           });
           ElMessage({
@@ -242,12 +188,20 @@ const delReciver = (id: string) => {
     });
   }
 };
-onMounted(() => {
-  robotizationBotHeight();
-});
-watch(transfer, () => {
-  robotizationBotHeight();
-});
+/**
+ * 获取接收人
+ */
+const getReceiver = () => {
+  if (RStore.$state.freq_user.length === 0) {
+    getCloselyReceiver().then((res) => {
+      RStore.setFreqUser(res.data.freq_user);
+      RStore.setRecvUser(res.data.recv_user);
+    });
+  }
+};
+
+getReceiver();
+onMounted(() => {});
 </script>
 
 <template>
@@ -291,11 +245,12 @@ watch(transfer, () => {
         >
           选择接收用户
         </v-btn>
-        <v-btn
+        <el-button
           :size="gSize.buttonSize"
-          variant="tonal"
           @click="delReciver('all')"
-          >清空</v-btn
+          :icon="IconClean"
+          color="#626aef"
+          >清空</el-button
         >
       </div>
       <div
@@ -307,7 +262,7 @@ watch(transfer, () => {
       >
         <div
           class="transfer-top-reciver-item"
-          v-for="i in recivers"
+          v-for="i in RStore.$state.recv_user"
           :key="i.user_id"
         >
           <v-chip label :size="gSize.chipSize">
@@ -322,9 +277,14 @@ watch(transfer, () => {
       </div>
     </div>
     <div class="transfer-mid" ref="transfermid">
-      <v-btn class="transfer-mid-sub" :size="gSize.buttonSize" variant="tonal">
+      <el-button
+        class="transfer-mid-sub"
+        color="#626aef"
+        :size="gSize.buttonSize"
+        :icon="IconUpload"
+      >
         提交
-      </v-btn>
+      </el-button>
       <el-upload
         v-model:file-list="fileList"
         class="upload-demo"
@@ -349,12 +309,12 @@ watch(transfer, () => {
         </template>
       </el-upload>
     </div>
-    <div
-      class="transfer-bot"
-      :style="{ height: botHeight + 'px' }"
-      :key="botHeight"
-      ref="transferbot"
-    >
+    <div class="transfer-bot" :key="botHeight" ref="transferbot">
+      <ListItem :operate="true" :cancel="true"></ListItem>
+      <ListItem :operate="true" :cancel="true"></ListItem>
+      <ListItem :operate="true" :cancel="true"></ListItem>
+      <ListItem :operate="true" :cancel="true"></ListItem>
+      <ListItem :operate="true" :cancel="true"></ListItem>
       <ListItem :operate="true" :cancel="true"></ListItem>
     </div>
   </div>
@@ -377,12 +337,11 @@ watch(transfer, () => {
 }
 .transfer {
   width: 100vw;
-  // background-color: #000;
   height: 100%;
-  // background: url("../../assets/imgs/sea.jpg");
-  // background-size: contain;
   background-color: #f3f3f3;
   padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
   &-top {
     height: auto;
     max-height: 10rem;
@@ -429,11 +388,10 @@ watch(transfer, () => {
     }
   }
   &-bot {
-    background-color: #fff;
-    padding: 0.5rem 0;
-    border-radius: 5px;
-    box-shadow: 0 1px 5px rgba(45, 47, 51, 0.2);
+    padding-top: .5rem;
     margin-top: 0.5rem;
+    flex: 1;
+    overflow: auto; // 如果内容过多，可以滚动
   }
 }
 </style>

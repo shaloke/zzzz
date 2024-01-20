@@ -5,6 +5,7 @@ import IconLsit from "~icons/app/list.svg";
 import IconSend from "~icons/app/send.svg";
 import MenuBtn from "@/components/MenuBtn.vue";
 import router from "@/router";
+
 const tabs = ref<any>(1);
 
 const menu = ref<any>(null);

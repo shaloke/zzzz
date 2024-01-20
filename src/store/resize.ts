@@ -38,29 +38,29 @@ export const globalSize = defineStore("globalSize", {
     },
     toolBtnSize():string|number {
       if (screen.value < minsize) {
-        return '3rem';
-      } else if (screen.value < lagsize && screen.value > minsize) {
-        return '4rem';
-      } else {
-        return '5rem';
-      }
-    },
-    toolBtnTextSize():string|number{
-      if (screen.value < minsize) {
-        return '1.75rem';
-      } else if (screen.value < lagsize && screen.value > minsize) {
         return '2rem';
+      } else if (screen.value < lagsize && screen.value > minsize) {
+        return '2.25rem';
       } else {
         return '2.5rem';
       }
     },
-    toolPSize():string|number{
+    toolBtnTextSize():string|number{
       if (screen.value < minsize) {
-        return '.75rem';
+        return '1rem';
       } else if (screen.value < lagsize && screen.value > minsize) {
         return '1.25rem';
       } else {
         return '1.5rem';
+      }
+    },
+    toolPSize():string|number{
+      if (screen.value < minsize) {
+        return '.5rem';
+      } else if (screen.value < lagsize && screen.value > minsize) {
+        return '.75rem';
+      } else {
+        return '1rem';
       }
     },
     vinputSize():string|number{
