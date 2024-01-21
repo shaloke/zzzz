@@ -86,7 +86,7 @@ const expand = ref<boolean>(false);
       <template v-slot:title>
         <div class="listitem-top">
           <div>
-            <v-chip class="mr-2" :size="gSize.chipSize">
+            <v-chip class="mr-2" :size="gSize.chipSize" color="rgb(95, 154, 162)" variant="outlined">
               <p class="listitem-top-id">ID：</p>
               <span>{{ props.cardinfo.id }}</span>
             </v-chip>
@@ -95,6 +95,7 @@ const expand = ref<boolean>(false);
               :color="
                 props.cardinfo.status == '文件传输完成' ? 'secondary' : 'orange'
               "
+              variant="outlined"
               label
             >
               <span>{{ props.cardinfo.status }}</span>

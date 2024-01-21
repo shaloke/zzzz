@@ -4,26 +4,21 @@ import IconFiles from "~icons/app/files.svg";
 // import IconClose from "~icons/app/close.svg";
 import IconClosefill from "~icons/app/closefill.svg";
 import IconSend from "~icons/app/send.svg";
-import { ElTreeV2 } from "element-plus";
 import type { TreeNode } from "element-plus/es/components/tree-v2/src/types";
-import type { UploadProps, UploadUserFile } from "element-plus";
-import { ElMessage, ElMessageBox } from "element-plus";
-import type { Action } from "element-plus";
+import type { UploadUserFile, UploadProps, Action } from "element-plus";
+import { ElMessage, ElMessageBox, ElTreeV2 } from "element-plus";
 import ListItem from "@/components/ListItem.vue";
 import { globalSize } from "@/store/resize";
 import useWindowResize from "@/utils/useWindowResize";
-import { getCloselyReceiver } from "@/apis/apis";
+import { getCloselyReceiver, uploadFiles } from "@/apis/apis";
 import { receiversStore } from "@/store/receiver";
 import IconClean from "~icons/app/clean.svg";
 import IconUpload from "~icons/app/upload.svg";
+import IconPicture from "~icons/app/picture.svg";
+import IconText from "~icons/app/text.svg";
 const RStore = receiversStore();
 
 const screen = useWindowResize();
-interface Tree {
-  id: string;
-  label: string;
-  children?: Tree[];
-}
 const gSize = globalSize();
 
 const reciverHeight = computed(() => {
@@ -35,79 +30,77 @@ const reciverHeight = computed(() => {
     return "5rem";
   }
 });
-const fileList = ref<UploadUserFile[]>([
-  {
-    name: "element-plus-logo.svg",
-    url: "https://element-plus.org/images/element-plus-logo.svg",
-  },
-  {
-    name: "element-plus-logo2.svg",
-    url: "https://element-plus.org/images/element-plus-logo.svg",
-  },
-  {
-    name: "element-plus-logo.svg",
-    url: "https://element-plus.org/images/element-plus-logo.svg",
-  },
-  {
-    name: "element-plus-logo2.svg",
-    url: "https://element-plus.org/images/element-plus-logo.svg",
-  },
-]);
-
-const handleRemove: UploadProps["onRemove"] = (file, uploadFiles) => {
-  console.log(file, uploadFiles);
+const uploadRef = ref();
+const filesList = ref<UploadUserFile[]>([]);
+const postFilesUrl = ref<string>("https://www.gzcdgd.com/trans/upload");
+const compression = ref<string | number>("0");
+const listType = ref<string>("text");
+const edata = computed(() => {
+  interface EDATA {
+    recv_users: any;
+    compression: any;
+  }
+  const params: EDATA = {
+    recv_users: JSON.stringify(RStore.$state.receivers),
+    compression: 0,
+  };
+  if (compression.value !== "") {
+    params.compression = compression.value;
+  }
+  return params;
+});
+const list = ref<any>([]);
+const beforeUpload: UploadProps["beforeUpload"] = (rawFile: any) => {
+  list.value.push(rawFile);
+  console.log(rawFile);
+  return false;
 };
-
-const handlePreview: UploadProps["onPreview"] = (uploadFile) => {
-  console.log(uploadFile);
+const submitUpload = () => {
+  // TODO：在这里使用定时器来请求接口并不好，待优化
+  setTimeout(() => {
+    let formData: any = new FormData();
+    if (compression.value !== "") {
+      formData.append("compression", compression.value);
+    }
+    formData.append("recv_users", JSON.stringify(RStore.$state.receivers));
+    for (let i = 0; i < list.value.length; i++) {
+      formData.append("files", list.value[i]);
+    }
+    uploadFiles(formData)
+      .then((res) => {
+        if (res.status !== "yes") {
+          ElMessage({
+            message: res.desc,
+            type: "error",
+          });
+        } else {
+          ElMessage({
+            message: res.desc,
+            type: "success",
+          });
+        }
+        list.value = [];
+      })
+      .catch(() => {
+        ElMessage({
+          message: "上传失败，请联系信息化中心",
+          type: "error",
+        });
+        list.value = [];
+      });
+  }, 500);
+  uploadRef.value.submit();
 };
-
-const handleExceed: UploadProps["onExceed"] = (files, uploadFiles) => {
-  ElMessage.warning(
-    `The limit is 3, you selected ${files.length} files this time, add up to ${
-      files.length + uploadFiles.length
-    } totally`
-  );
-};
-
-const beforeRemove: UploadProps["beforeRemove"] = (uploadFile) => {
-  return ElMessageBox.confirm(
-    `Cancel the transfer of ${uploadFile.name} ?`
-  ).then(
-    () => true,
-    () => false
-  );
+const changeView = () => {
+  if (listType.value === "text") {
+    listType.value = "picture";
+  } else {
+    listType.value = "text";
+  }
 };
 
 const drawer = ref<any>(false);
 
-const getKey = (prefix: string, id: number) => {
-  return `${prefix}-${id}`;
-};
-
-const createData = (
-  maxDeep: number,
-  maxChildren: number,
-  minNodesNumber: number,
-  deep = 1,
-  key = "node"
-): Tree[] => {
-  let id = 0;
-  return Array.from({ length: minNodesNumber })
-    .fill(deep)
-    .map(() => {
-      const childrenNumber =
-        deep === maxDeep ? 0 : Math.round(Math.random() * maxChildren);
-      const nodeKey = getKey(key, ++id);
-      return {
-        id: nodeKey,
-        label: nodeKey,
-        children: childrenNumber
-          ? createData(maxDeep, maxChildren, childrenNumber, deep + 1, nodeKey)
-          : undefined,
-      };
-    });
-};
 const botHeight = ref<number>(0);
 const transfer = ref<any>(null);
 const transfertop = ref<any>(null);
@@ -115,13 +108,13 @@ const transfermid = ref<any>(null);
 const transferbot = ref<any>(null);
 const query = ref("");
 const treeRef = ref<InstanceType<typeof ElTreeV2>>();
-const data = createData(4, 30, 5);
-const props = {
-  value: "id",
-  label: "label",
-  children: "children",
+const treeData = ref<any>();
+const treeProps = {
+  value: "id", // 唯一标识
+  label: "label", // 节点标签
+  children: "children", // 子节点
 };
-
+const defaultCheck = ref<any>([])
 const onQueryChanged = (query: string) => {
   // TODO: fix typing when refactor tree-v2
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -131,6 +124,10 @@ const filterMethod = (query: string, node: TreeNode) => {
   return node.label!.includes(query);
 };
 
+const addReceiver = () => {
+  console.log(treeRef.value!.getCheckedNodes());
+  RStore.updateReceivers(treeRef.value!.getCheckedNodes());
+};
 /**
  * 抽屉人员名单列表高度
  */
@@ -191,17 +188,25 @@ const delReciver = (id: string) => {
 /**
  * 获取接收人
  */
-const getReceiver = () => {
+const getReceiver = async () => {
   if (RStore.$state.freq_user.length === 0) {
     getCloselyReceiver().then((res) => {
       RStore.setFreqUser(res.data.freq_user);
       RStore.setRecvUser(res.data.recv_user);
+      treeData.value = RStore.$state.tree_data;//defaultCheck
+      RStore.$state.recv_user.forEach((it)=>{
+        defaultCheck.value.push(it.user_id)
+      })
     });
   }
 };
+getReceiver()
+const openDrawer = () => {
+  drawer.value = !drawer.value;
+};
+onMounted(() => {
 
-getReceiver();
-onMounted(() => {});
+});
 </script>
 
 <template>
@@ -225,11 +230,14 @@ onMounted(() => {});
         />
         <el-tree-v2
           ref="treeRef"
-          :data="data"
-          :props="props"
+          show-checkbox
+          :data="treeData"
+          :props="treeProps"
           :filter-method="(filterMethod as any)"
           :height="namelistHeight"
+          :default-checked-keys="defaultCheck"
         />
+        <el-button @click="addReceiver">添加</el-button>
       </div>
     </div>
   </el-drawer>
@@ -239,7 +247,7 @@ onMounted(() => {});
         <v-btn
           :prepend-icon="IconSend"
           variant="tonal"
-          @click="drawer = !drawer"
+          @click="openDrawer"
           color="#5F9AA2"
           :size="gSize.buttonSize"
         >
@@ -262,7 +270,7 @@ onMounted(() => {});
       >
         <div
           class="transfer-top-reciver-item"
-          v-for="i in RStore.$state.recv_user"
+          v-for="i in RStore.$state.receivers"
           :key="i.user_id"
         >
           <v-chip label :size="gSize.chipSize">
@@ -277,24 +285,44 @@ onMounted(() => {});
       </div>
     </div>
     <div class="transfer-mid" ref="transfermid">
-      <el-button
-        class="transfer-mid-sub"
-        color="#626aef"
-        :size="gSize.buttonSize"
-        :icon="IconUpload"
-      >
-        提交
-      </el-button>
+      <div class="transfer-mid-sub">
+        <el-button
+          class="ml-2"
+          :size="gSize.buttonSize"
+          type="primary"
+          @click="changeView"
+        >
+          <IconPicture
+            v-show="listType === 'picture'"
+            style="font-size: 16px"
+          ></IconPicture>
+          <IconText
+            v-show="listType === 'text'"
+            style="font-size: 16px"
+          ></IconText>
+        </el-button>
+        <el-button
+          color="#626aef"
+          :size="gSize.buttonSize"
+          :icon="IconUpload"
+          @click="submitUpload"
+        >
+          提交
+        </el-button>
+      </div>
+
       <el-upload
-        v-model:file-list="fileList"
-        class="upload-demo"
-        action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-        multiple
-        :on-preview="handlePreview"
-        :on-remove="handleRemove"
-        :before-remove="beforeRemove"
-        :limit="3"
-        :on-exceed="handleExceed"
+        ref="uploadRef"
+        :with-credentials="true"
+        :auto-upload="false"
+        :action="postFilesUrl"
+        :file-list="filesList"
+        :list-type="listType"
+        :data="edata"
+        :multiple="true"
+        name="files"
+        :limit="10"
+        :before-upload="beforeUpload"
       >
         <v-btn
           :prepend-icon="IconFiles"
@@ -304,6 +332,7 @@ onMounted(() => {});
         >
           上传文件
         </v-btn>
+
         <template #tip>
           <div class="el-upload__tip">文件大小不能超过10M</div>
         </template>
@@ -386,10 +415,12 @@ onMounted(() => {});
       top: 0.5rem;
       right: 0.25rem;
     }
+    ::v-deep(.el-icon--close) {
+      display: flex;
+    }
   }
   &-bot {
-    padding-top: .5rem;
-    margin-top: 0.5rem;
+    padding-top: 0.5rem;
     flex: 1;
     overflow: auto; // 如果内容过多，可以滚动
   }

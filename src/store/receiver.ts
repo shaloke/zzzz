@@ -1,13 +1,13 @@
-import { defineStore } from 'pinia';
-import { ElMessage } from 'element-plus';
-import { RECEIVERS, STATE } from '@/types/pinia/receiver';
+import { defineStore } from "pinia";
+import { ElMessage } from "element-plus";
+import { RECEIVERS, STATE } from "@/types/pinia/receiver";
 import {
   // uniqWith as _uniqWith,
   isEqual as _isEqual,
   omit as _omit,
-} from 'lodash';
+} from "lodash";
 
-export const receiversStore = defineStore('receiversInfo', {
+export const receiversStore = defineStore("receiversInfo", {
   state: (): STATE => {
     return {
       recv_user: [],
@@ -25,8 +25,8 @@ export const receiversStore = defineStore('receiversInfo', {
     setRecvUser(val: Array<RECEIVERS>) {
       const temp: Array<RECEIVERS> = val;
       val.forEach((item, index) => {
-        if (item.hasOwnProperty('count')) {
-          temp[index] = _omit(item, 'count');
+        if (item.hasOwnProperty("count")) {
+          temp[index] = _omit(item, "count");
         }
       });
       this.recv_user = temp;
@@ -36,28 +36,29 @@ export const receiversStore = defineStore('receiversInfo', {
     setFreqUser(val: Array<RECEIVERS>) {
       const temp: Array<RECEIVERS> = val;
       val.forEach((item, index) => {
-        if (item.hasOwnProperty('count')) {
-          temp[index] = _omit(item, 'count');
+        if (item.hasOwnProperty("count")) {
+          temp[index] = _omit(item, "count");
         }
       });
       this.freq_user = temp;
+      console.log(temp);
       this.setTreeData(val);
     },
     // 更新接收人
-    updateReceivers(val: Array<RECEIVERS>) {
+    updateReceivers(val: Array<any>) {
       // 处理原数组
       this.receivers.forEach((item, index) => {
-        if (item.hasOwnProperty('count')) {
-          this.receivers[index] = _omit(item, 'count');
+        if (item.hasOwnProperty("count")) {
+          this.receivers[index] = _omit(item, "count");
         }
       });
       // 处理参数
       val.forEach((item) => {
-        if (item.hasOwnProperty('html_name')) {
-          item = _omit(item, 'html_name');
+        if (item.hasOwnProperty("html_name")) {
+          item = _omit(item, "html_name");
         }
-        if (item.hasOwnProperty('label')) {
-          item = _omit(item, 'label');
+        if (item.hasOwnProperty("label")) {
+          item = _omit(item, "label");
         }
         // 避免重复选择
         let bool: boolean = false;
@@ -82,8 +83,8 @@ export const receiversStore = defineStore('receiversInfo', {
         }
       } else {
         ElMessage({
-          message: '接收人不能少于1个',
-          type: 'warning',
+          message: "接收人不能少于1个",
+          type: "warning",
         });
         return;
       }
@@ -96,27 +97,38 @@ export const receiversStore = defineStore('receiversInfo', {
     setTreeData(val: Array<RECEIVERS>) {
       const formatSearchResult = (val: Array<RECEIVERS>) => {
         const result = val;
-        const arr: string[] = [];
+        const arr: any[] = [];
         const endRes: RECEIVERS[] = [];
-        result.forEach((ele: RECEIVERS, index: number) => {
-          if (!arr.includes(ele['dept_full_name'])) {
-            arr.push(result[index]['dept_full_name']);
+        result.forEach((ele: RECEIVERS) => {
+          const obj = {
+            label: ele["dept_full_name"],
+            id: ele["dept_id"],
+            key: ele["dept_id"],
+          };
+          const isE: boolean = arr.find((e: any) => e.id === obj.id);
+          if (!isE) {
+            arr.push(obj);
           }
         });
-        // RStore.setSearchResult(res.data.data.user_search)
         for (let i = 0; i < arr.length; i++) {
           const treeData: any = {
-            label: '',
+            label: "",
+            id: 0,
             children: [],
+            key: '',
           };
-          if (arr[i] !== null) {
-            treeData.label = arr[i];
+          if (arr[i].label !== null) {
+            treeData.label = arr[i].label;
+            treeData.id = arr[i].id;
+            treeData.key = arr[i].id;
           } else {
-            treeData.label = '未知科室';
+            treeData.label = "未知科室";
+            treeData.id = 999;
           }
           for (let j = 0; j < result.length; j++) {
-            if (result[j]['dept_full_name'] === arr[i]) {
-              result[j]['label'] = result[j]['user_name'];
+            if (result[j]["dept_full_name"] === arr[i].label) {
+              result[j]["label"] = result[j]["user_name"];
+              result[j]["id"] = result[j]["user_id"];
               treeData.children.push(result[j]);
             }
           }

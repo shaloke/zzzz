@@ -40,32 +40,6 @@ const routes: any = [
         meta: {
           title: "我的",
         },
-        children: [
-          {
-            path: "/personalinfo",
-            name: "PersonalInfo",
-            component: () => import("@/views/mine/PersonalInfo.vue"),
-            meta: {
-              title: "个人信息",
-            },
-          },
-          {
-            path: "/personalauthority",
-            name: "PersonalAuthority",
-            component: () => import("@/views/mine/PersonalAuthority.vue"),
-            meta: {
-              title: "个人权限",
-            },
-          },
-          {
-            path: "/complaintbox",
-            name: "ComplaintBox",
-            component: () => import("@/views/mine/ComplaintBox.vue"),
-            meta: {
-              title: "意见箱",
-            },
-          },
-        ],
       },
       {
         path: "/list",
@@ -73,6 +47,30 @@ const routes: any = [
         component: () => import("@/views/home/List.vue"),
         meta: {
           title: "列表",
+        },
+      },
+      {
+        path: "/personalinfo",
+        name: "PersonalInfo",
+        component: () => import("@/views/mine/PersonalInfo.vue"),
+        meta: {
+          title: "个人信息",
+        },
+      },
+      {
+        path: "/personalauthority",
+        name: "PersonalAuthority",
+        component: () => import("@/views/mine/PersonalAuthority.vue"),
+        meta: {
+          title: "个人权限",
+        },
+      },
+      {
+        path: "/complaintbox",
+        name: "ComplaintBox",
+        component: () => import("@/views/mine/ComplaintBox.vue"),
+        meta: {
+          title: "意见箱",
         },
       },
     ],
