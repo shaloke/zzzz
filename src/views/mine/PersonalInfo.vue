@@ -5,7 +5,7 @@ import IdCard from "@/components/IdCard.vue";
 import IconEdit from "~icons/app/edit.svg";
 import IconSend from "~icons/app/send.svg";
 import { no } from "@/utils/msg";
-import { getFactorys } from "@/apis/apis";
+import { getFactorys, updateUserInfo } from "@/apis/apis";
 const UStore = userStore();
 // const factory = ref<string>(UStore.$state.userInfo.factory);
 // const department = ref<string>(UStore.$state.userInfo.dept_name);
@@ -26,9 +26,18 @@ const eidtForm = () => {
     if (!/^1[3456789]\d{9}$/.test(formLabelAlign.phoneNum)) {
       formLabelAlign.phoneNum = UStore.$state.userInfo.phone;
       no("请填写正确的电话号码");
+      readonly.value = !readonly.value;
       return;
+    } else {
+      const params = {
+        factory: formLabelAlign.factory,
+        phone: formLabelAlign.phoneNum,
+      };
+      updateUserInfo(params).then((res) => {
+        console.log(res);
+      });
+      readonly.value = !readonly.value;
     }
-    readonly.value = !readonly.value;
   }
 };
 
@@ -72,10 +81,10 @@ getFactory();
           </el-select>
         </el-form-item>
         <el-form-item label="部门：">
-          <el-input v-model="formLabelAlign.department" :readonly="readonly" />
+          <el-input v-model="formLabelAlign.department" :readonly="true" />
         </el-form-item>
         <el-form-item label="姓名：">
-          <el-input v-model="formLabelAlign.userName" :readonly="readonly" />
+          <el-input v-model="formLabelAlign.userName" :readonly="true" />
         </el-form-item>
         <el-form-item label="手机号：">
           <el-input v-model="formLabelAlign.phoneNum" :readonly="readonly" />

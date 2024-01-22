@@ -6,7 +6,7 @@ import request from '@/request';
  */
 export async function getUserInfo() {
   return request({
-    url: 'https://www.gzcdgd.com/trans/user/v2/info',
+    url: 'http://118.126.88.189:8081/trans/user/v2/info',
     method: 'GET',
   }).catch((err) => {
     throw new Error(err);
@@ -23,7 +23,7 @@ export async function bindUserInfo(params: {
   factory?: string;
 }) {
   return request({
-    url: 'https://www.gzcdgd.com/trans/user/v2/info',
+    url: 'http://118.126.88.189:8081/trans/user/v2/info',
     method: 'GET',
     data: params,
   }).catch((err) => {
@@ -40,7 +40,7 @@ export async function updateUserInfo(data: {
   factory?: string;
 }) {
   return request({
-    url: 'https://www.gzcdgd.com/trans/user/v2/info',
+    url: 'http://118.126.88.189:8081/trans/user/v2/info',
     method: 'POST',
     data: data,
   }).catch((err) => {
@@ -54,7 +54,7 @@ export async function updateUserInfo(data: {
  */
 export async function getFactorys() {
   return request({
-    url: 'https://www.gzcdgd.com/trans/factorys',
+    url: 'http://118.126.88.189:8081/trans/factorys',
     method: 'GET',
   }).catch((err) => {
     throw new Error(err);
@@ -68,13 +68,23 @@ export async function getFactorys() {
  */
 export async function getuploadList(params: string | number) {
   return request({
-    url: `https://www.gzcdgd.com/trans/uploadlist?size=${params}`,
+    url: `http://118.126.88.189:8081/trans/uploadlist?size=${params}`,
+    method: 'GET',
+    headers:{
+      'Authorization':''
+    }
+  }).catch((err) => {
+    throw new Error(err);
+  });
+}
+export async function getuploadListByType(params: string | number) {
+  return request({
+    url: `http://118.126.88.189:8081/trans/v2/uploadlist?size=${params}`,
     method: 'GET',
   }).catch((err) => {
     throw new Error(err);
   });
 }
-
 /**
  *
  * @returns 最近使用过的接收人
@@ -82,7 +92,7 @@ export async function getuploadList(params: string | number) {
 
 export async function getCloselyReceiver() {
   return request({
-    url: `https://www.gzcdgd.com/trans/v2/ref_user`,
+    url: `http://118.126.88.189:8081/trans/v2/ref_user`,
     method: 'GET',
   }).catch((err) => {
     throw new Error(err);

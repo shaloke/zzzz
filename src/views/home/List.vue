@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import ListItem from "@/components/ListItem.vue";
 import IconSearch from "~icons/app/search.svg";
-import { ref, computed, onMounted, watch } from "vue";
-
+import { ref, onMounted, watch, onBeforeUnmount } from "vue";
+// import { getQueryList } from "@/apis/apis";
+import axios from "axios";
+import { queryStore } from "@/store/query";
+import { userStore } from "@/store/user";
+const UStore = userStore();
+const QStore = queryStore();
 const searchKey = ref<string>("");
 const list = ref<any>(null);
 const listsearch = ref<any>(null);
@@ -11,13 +16,6 @@ const search = () => {
   alert(123);
 };
 
-const vertal = computed(() => {
-  let a: number[] = [];
-  for (let i = 0; i < 1000; i++) {
-    a.push(i);
-  }
-  return a;
-});
 const listvirtualHeight = ref<number>(0);
 const resizeListHeight = () => {
   const listHeight = list.value.getBoundingClientRect().height;
@@ -37,12 +35,59 @@ const resizeListHeight = () => {
     ) -
     listsearch.value.getBoundingClientRect().height;
 };
+const getList = () => {
+  const params: any = {
+    size: 10,
+    type: "all",
+  };
+  let url = "https://www.gzcdgd.com/trans/uploadlist";
+  if (QStore.$state.queryList.length > 0) {
+    params.uploadtime =
+      QStore.$state.queryList[
+        QStore.$state.queryList.length - 1
+      ].records_create;
+    url += `?uploadtime=${params.uploadtime}&size=${params.size}&type=${params.type}`;
+  } else {
+    url += `?size=${params.size}&type=${params.type}`;
+  }
+  axios
+    .get(url, {
+      headers: {
+        Authorization: "caa5366ab33c41aea76d76e502aa996f",
+      },
+    })
+    .then((res) => {
+      QStore.setQueryList(res.data.data.data);
+    });
+};
+if (QStore.$state.queryList.length <= 0) {
+  getList();
+}
+const isGetBottom = () => {
+  const el = listvirtual.value.$.vnode.component.vnode.el;
+  let scrollTop = el.scrollTop; // 获取元素的滚动条顶部位置
+  let scrollHeight = el.scrollHeight; // 获取元素的滚动条总高度
+  let clientHeight = el.clientHeight; // 获取元素的可见高度
+  if (scrollTop + clientHeight >= scrollHeight) {
+    getList();
+  }
+};
 onMounted(() => {
   resizeListHeight();
+  listvirtual.value.$.vnode.component.vnode.el.addEventListener(
+    "scroll",
+    isGetBottom
+  );
 });
-watch(list, () => {
-  resizeListHeight();
-});
+onBeforeUnmount(() => {
+  listvirtual.value.$.vnode.component.vnode.el.removeEventListener(
+    "scroll",
+    isGetBottom
+  );
+}),
+  watch(list, () => {
+    resizeListHeight();
+  });
 </script>
 
 <template>
@@ -62,15 +107,24 @@ watch(list, () => {
     <div class="list-content">
       <v-virtual-scroll
         :height="listvirtualHeight + 'px'"
-        :items="vertal"
+        :items="QStore.$state.queryList"
         ref="listvirtual"
         style="padding: 0 0.25rem"
       >
-        <template v-slot:default>
+        <template v-slot:default="{ item }">
           <ListItem
             :operate="false"
-            :spread="false"
-            :cardinfo="{ id: '334975', sender: '黄俊康', status: '文件传输中' }"
+            :cancel="false"
+            :spread="UStore.$state.userInfo.dept_id === 78 ? true : false"
+            :startTime="item.records_create"
+            :endTime="item.finish_time"
+            :predictTime="item.predict_time"
+            :cardinfo="{
+              id: item.id,
+              sender: item.send_user,
+              files: item.files,
+            }"
+            :recivers="item.recv_user"
           ></ListItem>
         </template>
       </v-virtual-scroll>

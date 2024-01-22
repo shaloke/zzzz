@@ -13,7 +13,7 @@ declare module 'axios' {
 
 // 创建一个axios实例对象，主要内容包括baseUrl、超时等内容
 const request = axios.create({
-  // baseURL: 'https://www.gzcdgd.com/trans/',
+  // baseURL: 'http://118.126.88.189:8081/',
   baseURL: 'https://www.gzcdgd.com/trans/v2/',
   withCredentials: true, //允许跨域携带cookie
   timeout: 20000, //设置超时时间
@@ -38,7 +38,6 @@ request.interceptors.request.use(
     }
     if (location.href.includes('?_time')) {
       location.assign(location.href.slice(0, location.href.indexOf('?_time')));
-      console.log(location.href);
     }
     config.headers!.Authorization = getToken();
     return config;

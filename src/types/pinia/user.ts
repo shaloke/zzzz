@@ -1,7 +1,7 @@
 export interface USERINFO {
   avatar: string;
   dept_full_name: string;
-  dept_id: string;
+  dept_id: number;
   dept_name: string;
   factory: string;
   name: string;

@@ -41,7 +41,6 @@ export const receiversStore = defineStore("receiversInfo", {
         }
       });
       this.freq_user = temp;
-      console.log(temp);
       this.setTreeData(val);
     },
     // 更新接收人

@@ -21,4 +21,5 @@ export interface QUERY {
 export interface STATE {
   queryList: Array<QUERY>;
   myQuery: Array<QUERY>;
+  my100Query: Array<QUERY>;
 }

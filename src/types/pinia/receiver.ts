@@ -12,5 +12,5 @@ export interface STATE {
   freq_user: Array<RECEIVERS>;
   receivers: Array<RECEIVERS>;
   search_result: Array<RECEIVERS>;
-  tree_data: Array<RECEIVERS>;
+  tree_data: Array<any>;
 }

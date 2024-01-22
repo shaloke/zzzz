@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import IconFiles from "~icons/app/files.svg";
-// import IconClose from "~icons/app/close.svg";
 import IconClosefill from "~icons/app/closefill.svg";
 import IconSend from "~icons/app/send.svg";
 import type { TreeNode } from "element-plus/es/components/tree-v2/src/types";
@@ -10,12 +9,16 @@ import { ElMessage, ElMessageBox, ElTreeV2 } from "element-plus";
 import ListItem from "@/components/ListItem.vue";
 import { globalSize } from "@/store/resize";
 import useWindowResize from "@/utils/useWindowResize";
-import { getCloselyReceiver, uploadFiles } from "@/apis/apis";
+import { getCloselyReceiver, uploadFiles, searchReceivers } from "@/apis/apis";
 import { receiversStore } from "@/store/receiver";
 import IconClean from "~icons/app/clean.svg";
 import IconUpload from "~icons/app/upload.svg";
 import IconPicture from "~icons/app/picture.svg";
 import IconText from "~icons/app/text.svg";
+import axios from "axios";
+import { queryStore } from "@/store/query";
+
+const QStore = queryStore();
 const RStore = receiversStore();
 
 const screen = useWindowResize();
@@ -52,7 +55,6 @@ const edata = computed(() => {
 const list = ref<any>([]);
 const beforeUpload: UploadProps["beforeUpload"] = (rawFile: any) => {
   list.value.push(rawFile);
-  console.log(rawFile);
   return false;
 };
 const submitUpload = () => {
@@ -106,7 +108,7 @@ const transfer = ref<any>(null);
 const transfertop = ref<any>(null);
 const transfermid = ref<any>(null);
 const transferbot = ref<any>(null);
-const query = ref("");
+// const query = ref("");
 const treeRef = ref<InstanceType<typeof ElTreeV2>>();
 const treeData = ref<any>();
 const treeProps = {
@@ -114,19 +116,47 @@ const treeProps = {
   label: "label", // 节点标签
   children: "children", // 子节点
 };
-const defaultCheck = ref<any>([])
-const onQueryChanged = (query: string) => {
-  // TODO: fix typing when refactor tree-v2
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  treeRef.value!.filter(query);
-};
+// const defaultCheck = ref<any>([]);
+// const defaultExpanded = ref<any>([]);
+const searchKey = ref<string>("");
+// const onQueryChanged = (query: string) => {
+//   // TODO: fix typing when refactor tree-v2
+//   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//   treeRef.value!.filter(query);
+// };
 const filterMethod = (query: string, node: TreeNode) => {
   return node.label!.includes(query);
 };
-
+/**
+ * 获取数据，接口为旧版接口
+ */
+const getList = () => {
+  axios
+    .get("https://www.gzcdgd.com/trans/uploadlist?size=10", {
+      headers: {
+        Authorization: "caa5366ab33c41aea76d76e502aa996f",
+      },
+    })
+    .then((res) => {
+      QStore.setMyQueryList(res.data.data.data);
+    });
+};
+// 没有数据才获取，避免重复请求
+if (QStore.$state.myQuery.length <= 0) {
+  getList();
+}
+/**
+ * 添加接收人
+ */
 const addReceiver = () => {
-  console.log(treeRef.value!.getCheckedNodes());
-  RStore.updateReceivers(treeRef.value!.getCheckedNodes());
+  let arr: any = [];
+  treeRef.value!.getCheckedNodes().forEach((it) => {
+    if (!("children" in it)) {
+      arr.push(it);
+    }
+  });
+  RStore.updateReceivers(arr);
+  drawer.value = false;
 };
 /**
  * 抽屉人员名单列表高度
@@ -193,20 +223,33 @@ const getReceiver = async () => {
     getCloselyReceiver().then((res) => {
       RStore.setFreqUser(res.data.freq_user);
       RStore.setRecvUser(res.data.recv_user);
-      treeData.value = RStore.$state.tree_data;//defaultCheck
-      RStore.$state.recv_user.forEach((it)=>{
-        defaultCheck.value.push(it.user_id)
-      })
+      treeData.value = RStore.$state.tree_data;
+      // RStore.$state.recv_user.forEach((it) => {
+      //   defaultCheck.value.push(it.user_id);
+      // });
+      // RStore.$state.tree_data.forEach((it) => {
+      //   defaultExpanded.value.push(it.id);
+      // });
     });
   }
 };
-getReceiver()
+/**
+ * 后端搜索人员
+ */
+const searchRecivers = () => {
+  searchReceivers(searchKey.value).then((res) => {
+    RStore.setTreeData(res.data.data.user_search);
+    treeData.value = RStore.$state.tree_data;
+  });
+};
+getReceiver();
+/**
+ * 打开抽屉
+ */
 const openDrawer = () => {
   drawer.value = !drawer.value;
 };
-onMounted(() => {
-
-});
+onMounted(() => {});
 </script>
 
 <template>
@@ -214,20 +257,31 @@ onMounted(() => {
     v-model="drawer"
     direction="ltr"
     size="100%"
-    show-close
     :modal="false"
     @open="drawerOpend"
+    custom-class="ddrawer"
+    :show-close="false"
   >
+    <template #header>
+      <div style="display: flex">
+        <el-input v-model="searchKey"></el-input>
+        <el-button @click="searchRecivers">搜索</el-button>
+      </div>
+    </template>
     <div class="drawer">
       <div class="drawer-top">
         <!-- <v-btn variant="text" :icon="IconClose" @click="drawer = false"></v-btn> -->
       </div>
       <div class="drawer-mid">
-        <el-input
+        <!-- <div style="display: flex">
+          <el-input v-model="searchKey"></el-input>
+          <el-button @click="searchRecivers">搜索</el-button>
+        </div> -->
+        <!-- <el-input
           v-model="query"
           placeholder="请输入关键字"
           @input="onQueryChanged"
-        />
+        /> -->
         <el-tree-v2
           ref="treeRef"
           show-checkbox
@@ -235,9 +289,11 @@ onMounted(() => {
           :props="treeProps"
           :filter-method="(filterMethod as any)"
           :height="namelistHeight"
-          :default-checked-keys="defaultCheck"
+          empty-text="无数据"
         />
-        <el-button @click="addReceiver">添加</el-button>
+        <el-button @click="addReceiver" type="success" class="addbtn"
+          >添加</el-button
+        >
       </div>
     </div>
   </el-drawer>
@@ -273,7 +329,7 @@ onMounted(() => {
           v-for="i in RStore.$state.receivers"
           :key="i.user_id"
         >
-          <v-chip label :size="gSize.chipSize">
+          <v-chip label :size="gSize.chipSize" color="primary">
             <p class="transfer-top-reciver-item-p">{{ i.user_name }}</p>
             <v-icon
               end
@@ -339,12 +395,21 @@ onMounted(() => {
       </el-upload>
     </div>
     <div class="transfer-bot" :key="botHeight" ref="transferbot">
-      <ListItem :operate="true" :cancel="true"></ListItem>
-      <ListItem :operate="true" :cancel="true"></ListItem>
-      <ListItem :operate="true" :cancel="true"></ListItem>
-      <ListItem :operate="true" :cancel="true"></ListItem>
-      <ListItem :operate="true" :cancel="true"></ListItem>
-      <ListItem :operate="true" :cancel="true"></ListItem>
+      <ListItem
+        v-for="it in QStore.$state.myQuery"
+        :operate="false"
+        :cancel="false"
+        :spread="true"
+        :startTime="it.records_create"
+        :endTime="it.finish_time"
+        :predictTime="it.predict_time"
+        :cardinfo="{
+          id: it.id,
+          sender: it.send_user,
+          files: it.files,
+        }"
+        :recivers="it.recv_user"
+      ></ListItem>
     </div>
   </div>
 </template>
@@ -357,6 +422,11 @@ onMounted(() => {
     justify-content: flex-end;
   }
   &-mid {
+    position: relative;
+    .addbtn {
+      position: absolute;
+      right: 0;
+    }
   }
 }
 .title {

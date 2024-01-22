@@ -26,7 +26,7 @@ const submitInfo = () => {
     score: rate.value,
     msg: msgText.value,
   };
-  console.log(params);
+  alert(params);
 };
 </script>
 

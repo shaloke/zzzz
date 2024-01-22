@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from "vue";
+import { ref, onMounted, watch } from "vue";
 import ToolBtn from "@/components/ToolBtn.vue";
 import IconMail from "~icons/app/mail.svg";
 import IconPersonalinfo from "~icons/app/personalinfo.svg";
@@ -7,11 +7,14 @@ import IconPower from "~icons/app/power.svg";
 import ListItem from "@/components/ListItem.vue";
 import IconBuilding from "~icons/app/building.svg";
 import IconWork from "~icons/app/work.svg";
-import {globalSize} from '@/store/resize'
-import { userStore } from '@/store/user';
+import { globalSize } from "@/store/resize";
+import { userStore } from "@/store/user";
+import { queryStore } from "@/store/query";
+import axios from "axios";
 
-const UStore = userStore()
-const gSize = globalSize()
+const QStore = queryStore();
+const UStore = userStore();
+const gSize = globalSize();
 const mine = ref<any>(null);
 const top = ref<any>(null);
 const mid = ref<any>(null);
@@ -22,15 +25,7 @@ const topx = ref<number>(0);
 const midx = ref<number>(0);
 const bot_margin_top = ref<number>(0);
 const titlex = ref<number>(0);
-
-const vertal = computed(() => {
-  let a: number[] = [];
-  for (let i = 0; i < 1000; i++) {
-    a.push(i);
-  }
-  return a;
-});
-
+const virtual = ref<any>();
 // 监听dom。如果变化则重新改变虚拟滚动高度
 watch(top, () => {
   // top的height和margin-top
@@ -68,6 +63,24 @@ watch(top, () => {
     titlex.value -
     64;
 });
+/**
+ * 获取数据,接口为旧版接口
+ */
+const getList = () => {
+  axios
+    .get("https://www.gzcdgd.com/trans/uploadlist?size=100", {
+      headers: {
+        Authorization: "caa5366ab33c41aea76d76e502aa996f",
+      },
+    })
+    .then((res) => {
+      QStore.set100MyQueryList(res.data.data.data);
+    });
+};
+// 没有数据才请求接口，避免重复请求
+if (QStore.$state.my100Query.length <= 0) {
+  getList();
+}
 onMounted(() => {});
 </script>
 
@@ -77,15 +90,30 @@ onMounted(() => {});
       <div class="mine-top-text">
         <p class="mine-top-text-name">{{ UStore.$state.userInfo.name }}</p>
         <p class="mine-top-text-info">
-          <v-chip label color="blue" class="mr-2" variant="flat" :size="gSize.chipSize"
-            ><v-icon :icon="IconBuilding"></v-icon>{{ UStore.$state.userInfo.factory }}</v-chip
+          <v-chip
+            label
+            color="blue"
+            class="mr-2"
+            variant="flat"
+            :size="gSize.chipSize"
+            ><v-icon :icon="IconBuilding"></v-icon
+            >{{ UStore.$state.userInfo.factory }}</v-chip
           >
-          <v-chip label color="#5F9AA2" class="mr-2" variant="flat" :size="gSize.chipSize"
-            ><v-icon :icon="IconWork"></v-icon>{{ UStore.$state.userInfo.dept_name }}</v-chip
+          <v-chip
+            label
+            color="#5F9AA2"
+            class="mr-2"
+            variant="flat"
+            :size="gSize.chipSize"
+            ><v-icon :icon="IconWork"></v-icon
+            >{{ UStore.$state.userInfo.dept_name }}</v-chip
           >
         </p>
       </div>
-      <v-avatar :image="UStore.$state.userInfo.avatar" :size="gSize.avatarSize"></v-avatar>
+      <v-avatar
+        :image="UStore.$state.userInfo.avatar"
+        :size="gSize.avatarSize"
+      ></v-avatar>
     </div>
     <div class="mine-mid" ref="mid">
       <!-- <div class="mine-mid-title">
@@ -95,22 +123,40 @@ onMounted(() => {});
         <ToolBtn title="个人信息" path="/personalinfo"
           ><IconPersonalinfo></IconPersonalinfo
         ></ToolBtn>
-        <ToolBtn title="个人权限" path="/personalauthority"><IconPower></IconPower></ToolBtn>
-        <ToolBtn title="意见箱" path="/complaintbox"><IconMail></IconMail></ToolBtn>
+        <ToolBtn title="个人权限" path="/personalauthority"
+          ><IconPower></IconPower
+        ></ToolBtn>
+        <ToolBtn title="意见箱" path="/complaintbox"
+          ><IconMail></IconMail
+        ></ToolBtn>
       </div>
     </div>
     <div class="mine-bot" ref="bot">
       <div class="mine-bot-title" ref="title">
         <p>个人传输列表</p>
-        <v-btn density="compact" variant="tonal" color="pink">全部展开</v-btn>
+        <!-- <v-btn density="compact" variant="tonal" color="pink">全部展开</v-btn> -->
       </div>
       <div class="mine-bot-list">
         <v-virtual-scroll
           :height="btoHeight"
-          :items="vertal"
+          :items="QStore.$state.my100Query"
+          ref="virtual"
         >
-          <template v-slot:default>
-            <ListItem :operate="false" :spread="false" :cardinfo="{id:'334975',sender:'黄俊康',status:'文件传输中'}"></ListItem>
+          <template v-slot:default="{ item }">
+            <ListItem
+              :operate="false"
+              :cancel="false"
+              :spread="true"
+              :startTime="item.records_create"
+              :endTime="item.finish_time"
+              :predictTime="item.predict_time"
+              :cardinfo="{
+                id: item.id,
+                sender: item.send_user,
+                files: item.files,
+              }"
+              :recivers="item.recv_user"
+            ></ListItem>
           </template>
         </v-virtual-scroll>
       </div>

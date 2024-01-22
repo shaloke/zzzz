@@ -2,9 +2,18 @@
 import { ref, PropType } from "vue";
 import { globalSize } from "@/store/resize";
 interface CARDINFO {
-  id: string;
-  status: string;
+  id: string | number;
   sender: string;
+  files: FILE[];
+}
+interface FILE {
+  finish_time: string;
+  id: number;
+  name: string;
+  predict_time: string;
+  status: string;
+  uni_name: string;
+  url: string;
 }
 const gSize = globalSize();
 
@@ -53,15 +62,15 @@ const props = defineProps({
   endTime: {
     type: String,
     default: () => {
-      return "yy-mm-dd hh-mm-ss";
+      return "";
     },
     require: false,
   },
   // 接收人
   recivers: {
-    type: Array as PropType<string[]>,
+    type: String,
     default: () => {
-      return ['xxx'];
+      return "";
     },
     require: false,
   },
@@ -69,15 +78,23 @@ const props = defineProps({
     type: Object as PropType<CARDINFO>,
     default: () => {
       return {
-        id:'999',
-        status:'xxxxxx',
-        sender:'xxx'
+        id: "999",
+        sender: "xxx",
+        files: [],
       };
     },
     require: true,
   },
+  // 预计时间
+  predictTime: {
+    type: String,
+    default: () => {
+      return "";
+    },
+    require: false,
+  },
 });
-const expand = ref<boolean>(false);
+const expand = ref<boolean>(props.spread ? true : false);
 </script>
 
 <template>
@@ -86,19 +103,36 @@ const expand = ref<boolean>(false);
       <template v-slot:title>
         <div class="listitem-top">
           <div>
-            <v-chip class="mr-2" :size="gSize.chipSize" color="rgb(95, 154, 162)" variant="outlined">
+            <v-chip
+              class="mr-2"
+              :size="gSize.chipSize"
+              color="rgb(95, 154, 162)"
+              variant="outlined"
+            >
               <p class="listitem-top-id">ID：</p>
               <span>{{ props.cardinfo.id }}</span>
             </v-chip>
             <v-chip
               :size="gSize.chipSize"
               :color="
-                props.cardinfo.status == '文件传输完成' ? 'secondary' : 'orange'
+                props.cardinfo.files[0].status ==
+                '文件已到达内网，等待发送OA邮件'
+                  ? 'secondary'
+                  : props.cardinfo.files[0].status == 'OA邮件已发送，请查收'
+                  ? 'blue'
+                  : 'orange'
               "
               variant="outlined"
               label
             >
-              <span>{{ props.cardinfo.status }}</span>
+              <span>{{
+                props.cardinfo.files[0].status ==
+                "文件已到达内网，等待发送OA邮件"
+                  ? "文件已到达内网"
+                  : props.cardinfo.files[0].status == "OA邮件已发送，请查收"
+                  ? "OA邮件已发送"
+                  : props.cardinfo.files[0].status
+              }}</span>
             </v-chip>
           </div>
           <div class="">
@@ -130,7 +164,9 @@ const expand = ref<boolean>(false);
               <div class="listitem-content-filesname">
                 <span>文件名：</span>
                 <div class="listitem-content-filesname-list">
-                  <p v-for="file in props.files" :key="file">{{ file }}</p>
+                  <p v-for="file in props.cardinfo.files" :key="file.id">
+                    {{ file.name }}
+                  </p>
                 </div>
               </div>
               <div class="listitem-content-time">
@@ -138,13 +174,18 @@ const expand = ref<boolean>(false);
                 <p>{{ props.startTime }}</p>
               </div>
               <div class="listitem-content-time">
-                <span>完成时间：</span>
-                <p>{{ props.endTime }}</p>
+                <span>{{
+                  props.endTime === "" ? "预计完成时间:" : "完成时间:"
+                }}</span>
+                <p>
+                  {{ props.endTime === "" ? props.predictTime : props.endTime }}
+                </p>
               </div>
               <div class="listitem-content-rece">
                 <span>接收人：</span>
                 <div class="listitem-content-rece-list">
-                  <p v-for="rec in props.recivers" :key="rec">{{ rec }}</p>
+                  <!-- <p v-for="rec in props.recivers" :key="rec">{{ rec }}</p> -->
+                  <p>{{ props.recivers }}</p>
                 </div>
               </div>
             </div>
@@ -159,7 +200,7 @@ const expand = ref<boolean>(false);
           :ripple="false"
           variant="outlined"
           :size="gSize.buttonSize"
-          style="margin-right: .25rem;"
+          style="margin-right: 0.25rem"
           >插队</v-btn
         >
         <v-btn
@@ -205,7 +246,7 @@ const expand = ref<boolean>(false);
       }
       &-list {
         display: flex;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         color: blue;
       }
     }
@@ -228,8 +269,8 @@ const expand = ref<boolean>(false);
     display: flex;
     justify-content: flex-end;
     width: 100%;
-    margin-bottom: .5rem;
-    padding-right: .5rem;
+    margin-bottom: 0.5rem;
+    padding-right: 0.5rem;
   }
 }
 </style>

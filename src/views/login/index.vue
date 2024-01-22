@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref,onMounted,onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
+import { bindUserInfo } from "@/apis/apis";
 import router from "@/router";
 const valid = ref<boolean>(false);
 const phoneNumber = ref<string>("");
@@ -14,28 +15,34 @@ const phoneRules = ref<any>([
     return "非法手机号";
   },
 ]);
-const passWord = ref<string>("");
-const passRules = ref<any>([
+const factory = ref<string>("");
+const factoryRules = ref<any>([
   (value) => {
     if (value) return true;
-    return "密码不能为空";
+    return "厂区不能为空";
   },
 ]);
 const loading = ref<boolean>(false);
 const login = async () => {
+  const params = {
+    factory: "广州总部",
+    phone: "15363668260",
+  };
+  bindUserInfo(params).then((res) => {
+    console.log(res);
+  });
   let phoneReg = /^1[3-9]\d{9}$/;
   if (
     phoneReg.test(phoneNumber.value) &&
     phoneNumber.value !== "" &&
-    passWord.value !== ""
+    factory.value !== ""
   ) {
     loading.value = true;
     setTimeout(() => {
-      alert("123");
       loading.value = false;
     }, 1000);
   } else {
-    router.push("/home");
+    router.push("/index");
   }
 };
 const showcdgd = ref<boolean>(true);
@@ -59,8 +66,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener("resize", resizeFunc);
 });
-
-
 </script>
 
 <template>
@@ -83,21 +88,22 @@ onBeforeUnmount(() => {
         >
           <v-text-field
             class="main-mid-form-input"
+            v-model="factory"
+            :rules="factoryRules"
+            label="厂区"
+            required
+            hide-details
+            type="password"
+          ></v-text-field>
+          <v-text-field
+            class="main-mid-form-input"
             v-model="phoneNumber"
             :rules="phoneRules"
             label="手机号"
             required
             hide-details
           ></v-text-field>
-          <v-text-field
-            class="main-mid-form-input"
-            v-model="passWord"
-            :rules="passRules"
-            label="密码"
-            required
-            hide-details
-            type="password"
-          ></v-text-field>
+
           <v-btn
             :loading="loading"
             block
