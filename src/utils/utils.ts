@@ -22,7 +22,7 @@ export function isValidKey(
  */
 export function firstToUpper(str: string): string {
   return str.replace(/(w)(w*)/g, function ($0, $1, $2) {
-    return $1.toUpperCase() + $2.toLowerCase();
+    return $0 + $1.toUpperCase() + $2.toLowerCase();
   });
 }
 

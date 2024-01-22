@@ -8,7 +8,7 @@ export const userStore = defineStore('userInfo', {
         avatar: '',
         factory: '',
         dept_full_name: '',
-        dept_id: '',
+        dept_id: 0,
         dept_name: '',
         name: '',
         phone: '',

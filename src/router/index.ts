@@ -107,7 +107,6 @@ router.beforeEach((to, _from, next) => {
         getUserInfo().then((res) => {
           if (res.status === 'success') {
             UStore.setUserInfo(res.data);
-            console.log(UStore.$state.userInfo)
             next();
           } else {
             next('/login');
