@@ -59,7 +59,7 @@ const UStore = userStore();
   background-size: 100%;
   box-shadow: 0 1px 5px rgba(45, 47, 51, 0.1);
   position: relative;
-  .mengban{
+  .mengban {
     width: 100%;
     height: 100%;
     position: absolute;
@@ -106,7 +106,7 @@ const UStore = userStore();
     &-left {
       flex: 60%;
       position: relative;
-      .content{
+      .content {
         position: absolute;
         z-index: 111;
       }

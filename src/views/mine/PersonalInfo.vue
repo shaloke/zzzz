@@ -1,24 +1,26 @@
 <script setup lang="ts">
+import { no } from "@/utils/msg";
 import { ref, reactive } from "vue";
 import { userStore } from "@/store/user";
-import IdCard from "@/components/IdCard.vue";
 import IconEdit from "~icons/app/edit.svg";
 import IconSend from "~icons/app/send.svg";
-import { no } from "@/utils/msg";
+import IdCard from "@/components/IdCard.vue";
 import { getFactorys, updateUserInfo } from "@/apis/apis";
+
 const UStore = userStore();
-// const factory = ref<string>(UStore.$state.userInfo.factory);
-// const department = ref<string>(UStore.$state.userInfo.dept_name);
-// const userName = ref<string>(UStore.$state.userInfo.name);
-// const phoneNum = ref<string>(UStore.$state.userInfo.phone);
+
 const readonly = ref<boolean>(true);
+const factorys = ref<Array<string>>([]);
+
 const formLabelAlign = reactive({
   factory: UStore.$state.userInfo.factory,
   department: UStore.$state.userInfo.dept_name,
   userName: UStore.$state.userInfo.name,
   phoneNum: UStore.$state.userInfo.phone,
 });
-const factorys = ref<Array<string>>([]);
+/**
+ * 编辑表格
+ */
 const eidtForm = () => {
   if (readonly.value) {
     readonly.value = !readonly.value;
@@ -40,7 +42,9 @@ const eidtForm = () => {
     }
   }
 };
-
+/**
+ * 获取工厂数据
+ */
 const getFactory = () => {
   getFactorys()
     .then((res) => {
@@ -90,30 +94,6 @@ getFactory();
           <el-input v-model="formLabelAlign.phoneNum" :readonly="readonly" />
         </el-form-item>
       </el-form>
-      <!-- <v-text-field
-        v-model="factory"
-        label="厂区："
-        type="input"
-        :readonly="readonly"
-      ></v-text-field>
-      <v-text-field
-        v-model="department"
-        label="部门："
-        type="input"
-        :readonly="readonly"
-      ></v-text-field>
-      <v-text-field
-        v-model="userName"
-        label="姓名："
-        type="input"
-        :readonly="readonly"
-      ></v-text-field>
-      <v-text-field
-        v-model="phoneNum"
-        label="手机号："
-        type="input"
-        :readonly="readonly"
-      ></v-text-field> -->
       <v-btn
         class="personalinfo-form-submit"
         :color="readonly ? '#5F9AA2' : 'blue'"

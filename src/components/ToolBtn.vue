@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import {globalSize} from '@/store/resize'
 import router from "@/router";
+import {globalSize} from '@/store/resize'
+
 const gSize = globalSize()
+
 const props = defineProps({
   title: {
     type: String,

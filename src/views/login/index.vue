@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from "vue";
-import { bindUserInfo } from "@/apis/apis";
 import router from "@/router";
+import { bindUserInfo } from "@/apis/apis";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 const valid = ref<boolean>(false);
 const phoneNumber = ref<string>("");
 const phoneRules = ref<any>([
@@ -23,6 +23,11 @@ const factoryRules = ref<any>([
   },
 ]);
 const loading = ref<boolean>(false);
+const showcdgd = ref<boolean>(true);
+const screenHeight = ref<any>();
+/**
+ * 登录函数
+ */
 const login = async () => {
   const params = {
     factory: "广州总部",
@@ -45,8 +50,6 @@ const login = async () => {
     router.push("/index");
   }
 };
-const showcdgd = ref<boolean>(true);
-const screenHeight = ref<any>();
 
 // 处理android键盘弹出
 const resizeFunc = () => {

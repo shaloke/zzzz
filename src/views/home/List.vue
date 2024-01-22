@@ -1,22 +1,28 @@
 <script setup lang="ts">
-import ListItem from "@/components/ListItem.vue";
-import IconSearch from "~icons/app/search.svg";
-import { ref, onMounted, watch, onBeforeUnmount } from "vue";
-// import { getQueryList } from "@/apis/apis";
 import axios from "axios";
-import { queryStore } from "@/store/query";
 import { userStore } from "@/store/user";
+import { queryStore } from "@/store/query";
+import IconSearch from "~icons/app/search.svg";
+import ListItem from "@/components/ListItem.vue";
+import { ref, onMounted, watch, onBeforeUnmount } from "vue";
+
 const UStore = userStore();
 const QStore = queryStore();
+
 const searchKey = ref<string>("");
 const list = ref<any>(null);
 const listsearch = ref<any>(null);
 const listvirtual = ref<any>(null);
-const search = () => {
-  alert(123);
-};
-
 const listvirtualHeight = ref<number>(0);
+/**
+ * 搜索
+ */
+const search = () => {
+  alert("搜索功能敬请期待！！！");
+};
+/**
+ * 虚拟列表高度
+ */
 const resizeListHeight = () => {
   const listHeight = list.value.getBoundingClientRect().height;
   const listsearch_margin_top = window
@@ -35,6 +41,9 @@ const resizeListHeight = () => {
     ) -
     listsearch.value.getBoundingClientRect().height;
 };
+/**
+ * 获取列表数据
+ */
 const getList = () => {
   const params: any = {
     size: 10,
@@ -60,9 +69,13 @@ const getList = () => {
       QStore.setQueryList(res.data.data.data);
     });
 };
+// 没有数据的时候才获取
 if (QStore.$state.queryList.length <= 0) {
   getList();
 }
+/**
+ * 虚拟列表滚动条触底函数
+ */
 const isGetBottom = () => {
   const el = listvirtual.value.$.vnode.component.vnode.el;
   let scrollTop = el.scrollTop; // 获取元素的滚动条顶部位置

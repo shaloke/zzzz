@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
-import ToolBtn from "@/components/ToolBtn.vue";
+import axios from "axios";
+import { userStore } from "@/store/user";
 import IconMail from "~icons/app/mail.svg";
-import IconPersonalinfo from "~icons/app/personalinfo.svg";
+import IconWork from "~icons/app/work.svg";
+import { queryStore } from "@/store/query";
+import { globalSize } from "@/store/resize";
+import { ref, onMounted, watch } from "vue";
 import IconPower from "~icons/app/power.svg";
+import ToolBtn from "@/components/ToolBtn.vue";
 import ListItem from "@/components/ListItem.vue";
 import IconBuilding from "~icons/app/building.svg";
-import IconWork from "~icons/app/work.svg";
-import { globalSize } from "@/store/resize";
-import { userStore } from "@/store/user";
-import { queryStore } from "@/store/query";
-import axios from "axios";
+import IconPersonalinfo from "~icons/app/personalinfo.svg";
 
 const QStore = queryStore();
 const UStore = userStore();
 const gSize = globalSize();
+
 const mine = ref<any>(null);
 const top = ref<any>(null);
 const mid = ref<any>(null);

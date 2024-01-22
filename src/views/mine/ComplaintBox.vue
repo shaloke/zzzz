@@ -20,7 +20,9 @@ const rateText = computed(() => {
     return "谢谢你给予我们如此高的评价🫰";
   }
 });
-
+/**
+ * 提交评价和意见函数
+ */
 const submitInfo = () => {
   const params = {
     score: rate.value,

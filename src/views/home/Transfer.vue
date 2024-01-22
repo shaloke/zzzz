@@ -1,43 +1,54 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
-import IconFiles from "~icons/app/files.svg";
-import IconClosefill from "~icons/app/closefill.svg";
-import IconSend from "~icons/app/send.svg";
-import type { TreeNode } from "element-plus/es/components/tree-v2/src/types";
-import type { UploadUserFile, UploadProps, Action } from "element-plus";
-import { ElMessage, ElMessageBox, ElTreeV2 } from "element-plus";
-import ListItem from "@/components/ListItem.vue";
-import { globalSize } from "@/store/resize";
-import useWindowResize from "@/utils/useWindowResize";
-import { getCloselyReceiver, uploadFiles, searchReceivers } from "@/apis/apis";
-import { receiversStore } from "@/store/receiver";
-import IconClean from "~icons/app/clean.svg";
-import IconUpload from "~icons/app/upload.svg";
-import IconPicture from "~icons/app/picture.svg";
-import IconText from "~icons/app/text.svg";
 import axios from "axios";
+import IconSend from "~icons/app/send.svg";
+import IconText from "~icons/app/text.svg";
 import { queryStore } from "@/store/query";
+import { globalSize } from "@/store/resize";
+import IconFiles from "~icons/app/files.svg";
+import IconClean from "~icons/app/clean.svg";
+import IconClose from "~icons/app/close.svg";
+import IconUpload from "~icons/app/upload.svg";
+import { ref, onMounted, computed } from "vue";
+import ListItem from "@/components/ListItem.vue";
+import IconPicture from "~icons/app/picture.svg";
+import { receiversStore } from "@/store/receiver";
+import IconClosefill from "~icons/app/closefill.svg";
+import useWindowResize from "@/utils/useWindowResize";
+import { ElMessage, ElMessageBox, ElTreeV2 } from "element-plus";
+import type { UploadUserFile, UploadProps, Action } from "element-plus";
+import type { TreeNode } from "element-plus/es/components/tree-v2/src/types";
+import { getCloselyReceiver, uploadFiles, searchReceivers } from "@/apis/apis";
 
 const QStore = queryStore();
 const RStore = receiversStore();
-
 const screen = useWindowResize();
 const gSize = globalSize();
+const treeProps = {
+  value: "id", // 唯一标识
+  label: "label", // 节点标签
+  children: "children", // 子节点
+};
 
-const reciverHeight = computed(() => {
-  if (screen.value < 350) {
-    return "3rem";
-  } else if (screen.value < 500 && screen.value > 350) {
-    return "5rem";
-  } else {
-    return "5rem";
-  }
-});
 const uploadRef = ref();
 const filesList = ref<UploadUserFile[]>([]);
 const postFilesUrl = ref<string>("https://www.gzcdgd.com/trans/upload");
 const compression = ref<string | number>("0");
 const listType = ref<string>("text");
+const list = ref<any>([]);
+const drawer = ref<any>(false);
+const botHeight = ref<number>(0);
+const transfer = ref<any>(null);
+const transfertop = ref<any>(null);
+const transfermid = ref<any>(null);
+const transferbot = ref<any>(null);
+const searchKey = ref<string>("");
+ const namelistHeight = ref<number>(300);// 抽屉人员名单列表高度
+// const query = ref("");
+const treeRef = ref<InstanceType<typeof ElTreeV2>>();
+const treeData = ref<any>();
+// const defaultCheck = ref<any>([]); // 默认选中
+// const defaultExpanded = ref<any>([]); // 默认展开
+
 const edata = computed(() => {
   interface EDATA {
     recv_users: any;
@@ -52,11 +63,26 @@ const edata = computed(() => {
   }
   return params;
 });
-const list = ref<any>([]);
+const reciverHeight = computed(() => {
+  if (screen.value < 350) {
+    return "3rem";
+  } else if (screen.value < 500 && screen.value > 350) {
+    return "5rem";
+  } else {
+    return "5rem";
+  }
+});
+/**
+ * 文件上传前回调
+ * @param rawFile
+ */
 const beforeUpload: UploadProps["beforeUpload"] = (rawFile: any) => {
   list.value.push(rawFile);
   return false;
 };
+/**
+ * 提交文件
+ */
 const submitUpload = () => {
   // TODO：在这里使用定时器来请求接口并不好，待优化
   setTimeout(() => {
@@ -93,6 +119,9 @@ const submitUpload = () => {
   }, 500);
   uploadRef.value.submit();
 };
+/**
+ * 更改文件视图picture或text
+ */
 const changeView = () => {
   if (listType.value === "text") {
     listType.value = "picture";
@@ -100,30 +129,21 @@ const changeView = () => {
     listType.value = "text";
   }
 };
-
-const drawer = ref<any>(false);
-
-const botHeight = ref<number>(0);
-const transfer = ref<any>(null);
-const transfertop = ref<any>(null);
-const transfermid = ref<any>(null);
-const transferbot = ref<any>(null);
-// const query = ref("");
-const treeRef = ref<InstanceType<typeof ElTreeV2>>();
-const treeData = ref<any>();
-const treeProps = {
-  value: "id", // 唯一标识
-  label: "label", // 节点标签
-  children: "children", // 子节点
-};
-// const defaultCheck = ref<any>([]);
-// const defaultExpanded = ref<any>([]);
-const searchKey = ref<string>("");
+/**
+ * 前端搜索框更改函数
+ * @param query 
+ * @param node 
+ */
 // const onQueryChanged = (query: string) => {
 //   // TODO: fix typing when refactor tree-v2
 //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //   treeRef.value!.filter(query);
 // };
+/**
+ * 虚拟树前端过滤函数
+ * @param query 
+ * @param node 
+ */
 const filterMethod = (query: string, node: TreeNode) => {
   return node.label!.includes(query);
 };
@@ -158,10 +178,7 @@ const addReceiver = () => {
   RStore.updateReceivers(arr);
   drawer.value = false;
 };
-/**
- * 抽屉人员名单列表高度
- */
-const namelistHeight = ref<number>(300);
+
 const drawerOpend = () => {
   const bodyHeight = (
     document.getElementsByClassName("el-drawer__body")[0] as any
@@ -259,24 +276,21 @@ onMounted(() => {});
     size="100%"
     :modal="false"
     @open="drawerOpend"
-    custom-class="ddrawer"
     :show-close="false"
+    :with-header="false"
   >
-    <template #header>
-      <div style="display: flex">
-        <el-input v-model="searchKey"></el-input>
-        <el-button @click="searchRecivers">搜索</el-button>
-      </div>
-    </template>
     <div class="drawer">
       <div class="drawer-top">
-        <!-- <v-btn variant="text" :icon="IconClose" @click="drawer = false"></v-btn> -->
+        <el-button @click="addReceiver" type="primary" plain class="addbtn"
+          >添加</el-button
+        >
+        <v-btn variant="text" :icon="IconClose" @click="drawer = false"></v-btn>
       </div>
       <div class="drawer-mid">
-        <!-- <div style="display: flex">
+        <div style="display: flex">
           <el-input v-model="searchKey"></el-input>
           <el-button @click="searchRecivers">搜索</el-button>
-        </div> -->
+        </div>
         <!-- <el-input
           v-model="query"
           placeholder="请输入关键字"
@@ -291,9 +305,6 @@ onMounted(() => {});
           :height="namelistHeight"
           empty-text="无数据"
         />
-        <el-button @click="addReceiver" type="success" class="addbtn"
-          >添加</el-button
-        >
       </div>
     </div>
   </el-drawer>
@@ -415,11 +426,17 @@ onMounted(() => {});
 </template>
 
 <style scoped lang="scss">
+.ddrawer {
+  background-color: #300000;
+  ::v-deep(.el-drawer__header) {
+    margin-bottom: 0 !important;
+  }
+}
 .drawer {
   &-top {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
   }
   &-mid {
     position: relative;

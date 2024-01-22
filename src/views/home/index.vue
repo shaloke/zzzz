@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch } from "vue";
-import IconPersonal from "~icons/app/personal.svg";
+import router from "@/router";
 import IconLsit from "~icons/app/list.svg";
 import IconSend from "~icons/app/send.svg";
 import MenuBtn from "@/components/MenuBtn.vue";
-import router from "@/router";
+import IconPersonal from "~icons/app/personal.svg";
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 
 const tabs = ref<any>(1);
-
 const menu = ref<any>(null);
 const showmune = ref<boolean>(true);
 const screenHeight = ref<any>();
 const viewHeight = ref<any>(0);
+
 // 处理android键盘弹出
 const resizeFunc = () => {
   let resizeHeight =
