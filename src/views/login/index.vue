@@ -121,6 +121,7 @@ onBeforeUnmount(() => {
     </div>
     <div class="main-btm" v-show="showcdgd">
       <p>©广州长岛光电机械厂</p>
+      <a href=" " target="_blank">粤ICP备18037101号-1</a>
     </div>
   </div>
 </template>
